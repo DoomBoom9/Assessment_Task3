@@ -1,0 +1,47 @@
+<!-- Simple display shopping cart -->
+ 
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Cart</title>
+</head>
+<body>
+    <h3>Shopping Cart</h3>
+
+    {% if cart_items %}  <!-- display any shopping cart items (may be none) -->
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            
+            <tbody>
+                {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>${{ item.subtotal }}</td>
+                    <td>
+                        <a href="{{ url_for('remove_from_cart', product_id=item.product.id) }}">Remove</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3>Total: ${{ total }}</h3> 
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
+
+    <p><a href="{{ url_for('home') }}">← Back to products</a></p>
+
+</body>
+</html>
