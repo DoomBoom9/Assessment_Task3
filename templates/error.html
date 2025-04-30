@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content%}
+{% if error==404 %}
+
+    <h1>Oops! Page not found.</h1>
+    <p>Sorry, the page you're looking for doesn't exist. Please check the URL or go back to the <a href="/">homepage</a>.</p>
+
+
+{% elif error==500 %}
+
+    <h1>An unexpected error has occured! </h1>
+    <p><a href="/">homepage</a></p>
+{%elif error==403 %}
+    <h1>Forbidden</h1>
+    <p>Sorry, you don't have permission to access this page. Please go back to the <a href="/">homepage</a>.</p>
+{% else %}
+
+    <h1>An unexpected error has occured! </h1>
+    <p>{{error}}</p>
+    <p> <a href="/">homepage</a></p>
+{% endif %}
+{%endblock%}

@@ -1,0 +1,31 @@
+{%extends "base.html"%}
+{%block title%}Forgot Password{%endblock%}
+{%block pageName%}<div id=pageName>Forgot Password</div>{%endblock%}
+{% block content %}
+{%autoescape false %}
+<form action="/answer_security" id='form' method="post" class="box">
+    <div class="align">
+        <div class=input-container> <!-- coloured wrapper/volume -->
+            <h3>{{securityQ1}}</h3>
+            <div class="input__wrapper"> 
+                <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="input__field" required/>
+            </div>
+            <h3>{{securityQ2}}</h3>
+            <div class="input__wrapper"> 
+                <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="input__field" required/>
+            </div>
+            <h3>{{securityQ3}}</h3>
+            <div class="input__wrapper"> 
+                <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="input__field" required/>
+            </div>
+            <div class="input__wrapper">
+                <input type="submit" id="submit" value="submit" />
+            </div>
+        </div>
+    </div>
+    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+</form>
+<script src="static/script.js"></script>
+{%endautoescape%}
+{%endblock%}

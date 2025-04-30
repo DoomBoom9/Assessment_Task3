@@ -88,11 +88,26 @@ def admin_dashboard():
         return render_template('adminDashboard.html', username=username, securityQ1=user_info[0], securityQ2=user_info[1], securityQ3=user_info[2], address=user_info[3], phone_number=user_info[4], picture=user_info[5])
     else:
         abort(403)
+
+@limiter.limit("1 per minute")
+@app.route("/checkout")
+def checkout():
+    pass
+
+@limiter.limit("1 per minute")
+@app.route("/shopping_cart")
+def shopping_cart():
+    pass
+
+@limiter.limit("5 per second")
+@app.route("/", methods=['POST', 'GET'])
+def products():
+    return render_template("products.html")
 #endregion
 #region Auths
 
 
-@app.route("/", methods=['POST','GET'])
+@app.route("/login", methods=['POST','GET'])
 @limiter.limit(default)
 def login():
     timeout = 600 #sets the time in seconds that accounts will be locked for upon too many login attempts
@@ -367,14 +382,14 @@ def internal_error(e):
     return render_template('error.html', error=500), 500
 #endregion
 
-#region misc need in main
+#region misc needed in main
 def encrypt_input(input:str, cipher:str) -> str:
     return cipher.encrypt(input.encode())
 
 def decrypt_input(input:str, cipher:str) -> str:
     return cipher.decrypt(input).decode()
-#end region
+#endregion
 
 
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5000)

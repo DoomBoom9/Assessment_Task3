@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{%block title%}Dashboard{%endblock%}
+{%block pageName%}<div id="pageName">Dashboard</div>{%endblock%}
+{%block content%}
+<link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
+<link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+<div class="parent">
+    <div class="child">
+        <div class="layout_wrapper">
+        
+            <div class="centre">
+                <h3>Welcome {{username}}!<h3>
+                <img src="{{picture}}" alt="User profile picture"> <!--src image must be changed when parsed as a variable-->
+                <h2>Change Profile Picture</h2>
+
+                <form action="/dashboard" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="file" required>
+                    <br><br>
+                    <button type="submit">Upload</button>
+                    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+                    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+                </form>
+
+                <a href="/logout">Log out</a>
+            </div>
+            
+        </div>
+    </div>
+    <div class="child">
+        <div class="layout_wrapper">
+            <h2>Phone Number</h2>
+            <h3>{{phone_number}}</h3>
+            <br>
+            <h2>Address</h2>
+            <h3>{{address}}</h3>
+            <br>
+            <h2>Security Questions</h2>
+            <h3>{{securityQ1}}</h3>
+            <h3>{{securityQ2}}</h3>
+            <h3>{{securityQ3}}</h3>
+
+        </div>
+    </div>
+</div>
+<script src="static/script.js"></script>
+{%endblock%}

@@ -1,0 +1,20 @@
+.boxes{
+    background-color: #205A28;
+}
+
+.buttons {
+    background-color: #C72B32;
+    color:  #ffffff;
+    
+}
+
+.container-sm {
+    background-color: #205A28;
+}
+.container {
+    background-color: #205A28;
+}
+body {
+    margin-left : 2rem;
+    margin-right : 2rem;
+}
