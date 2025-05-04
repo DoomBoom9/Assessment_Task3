@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{%block title%}Shopping Cart{%endblock%}
+{%block pageName%}<div id="pageName">Shopping Cart</div>{%endblock%}
+{%block content%}
+{%for item in cart%}
+<div class="cart-item">
+    <img src="{{item.image}}" alt="Item image">
+    <h3>{{item.name}}</h3>
+    <p>Price: ${{item.price}}</p>
+    <p>Item Unit: {{item.unit}}</p>
+    <p>Quantity: {{item.quantity}}</p>
+    <form action="/remove_from_cart" method="POST">
+        <input type="hidden" name="item_id" value="{{item.id}}">
+        <button type="submit">Remove</button>
+        <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+        <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+    </form>
+{%endfor%}
+{%endblock%}

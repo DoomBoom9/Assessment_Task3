@@ -1,0 +1,85 @@
+{%extends "base.html"%}
+{%block title%}Receipt{%endblock%}
+{%block pageName%}<div id="pageName">Receipt</div>{%endblock%}
+{%block content%}
+
+<div class="container py-5 text-center rounded">
+    <img class="mb-4 d-block mx-auto" alt="Company Logo" src="insert_logo_here" width="72" height="72">
+    <h2>Receipt</h2>
+    <p class="lead">Thanks for shopping</p>
+</div>
+<div class="container rounded" style="background-color: lightgray;">
+    <h4 class="mb-3 p-5">Receipt Number</h4>
+    <p>{{receipt_number}}</p>
+    <h4 class="mb-3 p-5">Order Date</h4>
+    <p>{{order_date}}</p>
+    <h4 class="mb-3 p-5">Bill To</h4>
+    <div class="row p-5">
+        <div class="col-sm-6 py-1">
+            <label class="form-label">First Name</label>
+            <p>{{user.billing_first_name}}</p>
+        </div>
+        <div class="col-sm-6 py-1">
+            <label class="form-label">Last Name</label>
+            <p>{{user.billing_last_name}}</p>
+        </div>
+        <div class="col-md-5 py-1">
+            <label class="form-label">Billing Address</label>
+            <p>{{user.billing_address}}, {{user.billing_post_code}}</p>
+            <p>{{user.billing_state}} {{user.billing_country}}</p>
+        </div>
+       
+        <hr class="my-4">
+        <h4 class="mb-3 py-3">Ship To</h4>
+
+        <div class="col-sm-6 py-1">
+            <label class="form-label">First Name</label>
+            <p>{{user.shipping_first_name}}</p>
+        </div>
+        <div class="col-sm-6 py-1">
+            <label class="form-label">Last Name</label>
+            <p>{{user.shipping_last_name}}</p>
+        </div>
+        <div class="col-md-5 py-1">
+            <label class="form-label">Shipping Address</label>
+            <p>{{user.shipping_address}}, {{user.shipping_post_code}}</p>
+            <p>{{user.shipping_state}} {{user.shipping_country}}</p>
+        </div>
+
+        <hr class="my-4">
+        <h4 class="mb-3 py-3">Order Summary</h4>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{item.name}}</td>
+                    <td>${{item.price}}</td>
+                    <td>{{item.quantity}}</td>
+                    <td>${{item.price * item.quantity}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">Subtotal</td>
+                    <td>${{subtotal}}</td>
+                </tr>
+                <tr>
+                    <td colspan="3">Total</td>
+                    <td>${{total}}</td>
+                </tr>
+        </table>
+        <hr class="my-4">
+    </div>
+</div>
+
+<script type='text/javascript' src="static/checkout.js"></script>
+{%endblock%}

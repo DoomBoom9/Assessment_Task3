@@ -14,7 +14,7 @@ CREATE TABLE users (
    securityA2 TEXT NOT NULL,
    securityA3 TEXT NOT NULL,
    address TEXT NOT NULL,
-   phoneNumber INTEGER NOT NULL,
+   phone_number INTEGER NOT NULL,
    picture TEXT NOT NULL,
    role INTEGER NOT NULL,
    attempts INTEGER NOT NULL,

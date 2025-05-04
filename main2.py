@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_session import Session
-from user_management import *
+from sqlite_operations import *
 from validation import *
 import os
 from cryptography.fernet import Fernet
@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from werkzeug.exceptions import RequestEntityTooLarge
+from ORM.ORM_operations import *
 
 
 #region __init__
@@ -67,6 +68,27 @@ def get_products():
 def product_page():
     products = get_products()
     return render_template("products.html", products=products)
+
+@app.route("/checkout", methods=['POST', 'GET'])
+def checkout_page():
+    return render_template("checkout.html")
+
+@app.route("/cart", methods=['POST', 'GET'])
+def cart_page():
+    # Get the cart from the session
+    # Get Quantity
+    # Get each product price
+    # Calculate total price
+    # Parse item name and image into the page once ORM is implemented
+    cart=1
+
+    return render_template("cart.html", cart=cart)
+
+@app.route("/receipt", methods=['POST', 'GET'])
+def receipt_page():
+    
+
+    return render_template("receipt.html")
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

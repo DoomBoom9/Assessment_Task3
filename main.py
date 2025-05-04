@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, session, redirect, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_session import Session
-from user_management import *
+from sqlite_operations import *
 from validation import *
 import os
 from cryptography.fernet import Fernet
@@ -12,6 +12,7 @@ import time
 from datetime import datetime
 from flask_wtf import CSRFProtect
 from werkzeug.exceptions import RequestEntityTooLarge
+from ORM.ORM_operations import *
 
 #region __init__
 app = Flask(__name__) #insert private keygen somewhere here
@@ -73,7 +74,7 @@ def dashboard():
         #realistically there should be a popup saying not logged in with some js or whatnot
 
 
-@limiter.limit("1 per minute")
+@limiter.limit(default)
 @app.route("/admin_dashboard")
 def admin_dashboard():
     if ('username' not in session):
@@ -89,20 +90,26 @@ def admin_dashboard():
     else:
         abort(403)
 
-@limiter.limit("1 per minute")
+@limiter.limit(default)
 @app.route("/checkout")
 def checkout():
-    pass
+    return render_template("checkout.html",  methods=['POST', 'GET'])
 
-@limiter.limit("1 per minute")
-@app.route("/shopping_cart")
+@limiter.limit(default)
+@app.route("/shopping_cart",  methods=['POST', 'GET'])
 def shopping_cart():
-    pass
+    return render_template("shopping_cart.html")
 
 @limiter.limit("5 per second")
 @app.route("/", methods=['POST', 'GET'])
 def products():
-    return render_template("products.html")
+    product_list = get_products()
+    return render_template("products.html", products=product_list)
+
+@limiter.limit(default)
+@app.route("/receipt",  methods=['POST', 'GET'])
+def receipt():
+    return render_template("receipt.html", user=user)
 #endregion
 #region Auths
 
@@ -111,7 +118,7 @@ def products():
 @limiter.limit(default)
 def login():
     timeout = 600 #sets the time in seconds that accounts will be locked for upon too many login attempts
-    if (request.method == "POST"):
+    if request.method == "POST":
         username = request.form['username']
         password = request.form['password']
         honeypot = request.form['honeypot']
