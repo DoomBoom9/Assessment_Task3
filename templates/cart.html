@@ -2,18 +2,60 @@
 {%block title%}Shopping Cart{%endblock%}
 {%block pageName%}<div id="pageName">Shopping Cart</div>{%endblock%}
 {%block content%}
-{%for item in cart%}
-<div class="cart-item">
-    <img src="{{item.image}}" alt="Item image">
-    <h3>{{item.name}}</h3>
-    <p>Price: ${{item.price}}</p>
-    <p>Item Unit: {{item.unit}}</p>
-    <p>Quantity: {{item.quantity}}</p>
-    <form action="/remove_from_cart" method="POST">
-        <input type="hidden" name="item_id" value="{{item.id}}">
-        <button type="submit">Remove</button>
+
+
+<table class="container m-5 table table-bordered">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Product</th>
+            <th scope="col">Price</th>
+            <th scope="col">Item Unit</th>
+            <th scope="col">Quantity</th>
+            <th scope="col">Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%for item in cart%}
+        <tr>
+            <th scope="row">{{loop.index}}</th>
+            <td>{{item.name}}</td>
+            <td>$ {{item.price}}</td>
+            <td>{{item.unit}}</td>
+            <td>{{cart[item]}}</td>
+            <td>$ {{cart[item]*item.price}}</td>
+            
+            
+            <td>
+                <form action="/remove_from_cart" method="POST">
+                    <input type="hidden" name="item_id" value="{{item.id}}">
+                    <button type="submit">Remove</button>
+                    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+                    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+                </form>
+            </td>
+        </tr>
+        {%endfor%}
+    </tbody>
+</table>
+<div class="container m-5">
+    {% set totals = [] %}
+    {% for item in cart %}
+        {% if totals.append(cart[item]*item.price) %}{% endif %}
+    {% endfor %}
+    {% set total = totals | sum %}
+    <h3>Total: $ {{total}}</h3>
+
+ 
+    <form action="/checkout" method="POST">
         <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
         <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+        <button type="submit">Checkout</button>
     </form>
-{%endfor%}
+    <form action="/clear_cart" method="POST">
+        <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+        <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+        <button type="submit">Clear Cart</button>
+    </form>
+</div>
 {%endblock%}

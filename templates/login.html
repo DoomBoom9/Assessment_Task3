@@ -3,26 +3,34 @@
 {% block content %}
 {% autoescape false %}
 <form action="/login" id='form' method="post" class="box">
+    <div class="container py-5 text-center rounded">
+        <img class="mb-4 d-block mx-auto" alt="Company Logo" src="insert_logo_here" width="72" height="72">
+        <h2>Login</h2>
+    </div>
     <div class="align">
         <h3>{{error}}</h3>
-        <div class=input-container> <!-- coloured wrapper/volume -->
-            <h1>Login</h1>
-            <div class="input__wrapper"> <!-- box css-->
-                <input type="text" name="username" id="username" placeholder="Username" class="input__field" required/>
+        <div class="container rounded" style='background-color: lightgray'> <!-- coloured wrapper/volume -->
+            <br>
+            <br>
+            <div class="px-5 py-2"> <!-- box css-->
+                <label for="username" class="form-label">Username</label>
+                <input type="text" name="username" id="username" placeholder="Username" class="form-control" required/>
             </div>
-            <div class="input__wrapper">
-                <input type="password" name="password" id="password" placeholder="Password" class="input__field" required/>
+            <div class="px-5 py-2">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" name="password" id="password" placeholder="Password" class="form-control" required/>
             </div>
-            <div class="input__wrapper">
+            <div class="px-5 py-2">
                 <a href="/forgot_password">Forgot password?</a>
             </div>
-            <div class="input__wrapper">
-                <input type="submit" id="submit" value="Log In" />
+            <div class="px-5 py-5">
+                <button type="submit" id="submit" class="btn btn-lg btn-block px-5" style="background-color: #C72B32; color: white;">Login</button>
             </div>
+            
         </div>
     </div>
-    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
-    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
+    <input name="honeypot" id="honeypot" tabindex="-1" autocomplete="off" hidden>
+    <input id='token' name="csrf_token" value = "{{ csrf_token() }}" hidden/>
 </form>
 <script src="static/script.js"></script>
 {%endautoescape%}

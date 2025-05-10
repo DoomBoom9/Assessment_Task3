@@ -1,9 +1,9 @@
 try:
-    from ORM.ORM_TEST import engine, session
+    from ORM.ORM_TEST import engine, ORM_session
     from ORM.base import Model
     from ORM.tables import *
 except ImportError:
-    from ORM_TEST import engine, session
+    from ORM_TEST import engine, ORM_session
     from base import Model
     from tables import *
 
@@ -42,13 +42,13 @@ if __name__ == "__main__":
     Model.metadata.create_all(engine)
 
     for role in roles:
-        session.add(Role(
+        ORM_session.add(Role(
             role=role[0],
             description=role[1]
         ))
 
     for product in product_info:
-        session.add(Product(
+        ORM_session.add(Product(
             name=product[0],
             description=product[1],
             dimensions=product[2],
@@ -59,6 +59,6 @@ if __name__ == "__main__":
             category=product[7],
             image=product[8]
         ))
-    session.commit()
-    session.close()
+    ORM_session.commit()
+    ORM_session.close()
   

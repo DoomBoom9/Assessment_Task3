@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 engine = create_engine(f'sqlite:///{BASE_DIR}/db.db', echo=True)
 
-session = scoped_session(
+ORM_session = scoped_session(
     sessionmaker(
         autoflush=False,
         autocommit=False,

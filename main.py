@@ -92,25 +92,64 @@ def admin_dashboard():
 
 @limiter.limit(default)
 @app.route("/checkout")
-def checkout():
+def checkout_page():
     return render_template("checkout.html",  methods=['POST', 'GET'])
 
 @limiter.limit(default)
-@app.route("/shopping_cart",  methods=['POST', 'GET'])
-def shopping_cart():
-    return render_template("shopping_cart.html")
+@app.route("/cart",  methods=['POST', 'GET'])
+def shopping_cart_page():
+    cart = session.get("cart", {})
+    if not cart:
+        return render_template("cart.html", error="Your cart is empty.")
+    object_quantity_dict = {}
+    for i in cart.keys():
+        object_quantity_dict[get_product_by_id(i)] = cart[i] #creates a dictionary of the products in the cart
+    print(object_quantity_dict)
+    return render_template("cart.html", cart=object_quantity_dict) 
 
 @limiter.limit("5 per second")
 @app.route("/", methods=['POST', 'GET'])
-def products():
+def products_page():
     product_list = get_products()
     return render_template("products.html", products=product_list)
 
 @limiter.limit(default)
 @app.route("/receipt",  methods=['POST', 'GET'])
-def receipt():
+def receipt_page():
     return render_template("receipt.html", user=user)
+
+@limiter.limit(default)
+@app.route("/about",  methods=['POST', 'GET'])
+def about_page():
+    return render_template("about.html")
 #endregion
+
+#region Non-Displayable Routes
+@app.route("/add_to_cart/<int:product_id>_<int:quantity>")   # Add to cart by product_id
+def add_to_cart(product_id, quantity):
+    
+    cart = session.get("cart", {})  # Get the cart from the session, or create a new one if it doesn't exist
+
+    product_id_str = str(product_id)  # Convert to string
+    if product_id_str not in cart:
+        cart[product_id_str] = quantity
+    else:
+        cart[product_id_str] += quantity
+ 
+
+
+    # IMPORTANT - Convert product_id to a string (because session keys are strings).  
+    # If the product is already in the cart, increase the quantity by 1.
+    # If not, start with 0 and add 1.
+
+    print(cart)
+    session["cart"] = cart
+    print(session["cart"])
+    # Save the updated cart back into the session.
+
+    return redirect("/")
+#endregion
+
 #region Auths
 
 

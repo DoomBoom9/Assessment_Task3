@@ -5,60 +5,60 @@
 <h3>{{error}}</h3>
 <form action="/register" id='form' method="POST" class="box" enctype='multipart/form-data'>
     <div class="align">
-        <div class=input-container>
+        <div class='container py-5 rounded' style="background-color: lightgray">
             <h1>Register</h1>
-            <div class="input__wrapper"> 
-                <input type="text" name="username" id="username" placeholder="Username" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="username" id="username" placeholder="Username" class="form-control" required/>
                 <p id="usernameLengthReq" hidden>Username must be less than 26 characters!</p>
             </div>
-            <div class="input__wrapper">
-                <input type="password" name="password" id="password" placeholder="Password" class="input__field" required/>
+            <div class="px-5 py-2">
+                <input type="password" name="password" id="password" placeholder="Password" class="form-control" required/>
                 <p id="passwordLengthReq" hidden>Password must be greater than 11 and less than 26 characters</p>
                 <p id="passwordUpperReq" hidden>Password must contain at least 1 uppercase letter</p>
                 <p id="passwordLowerReq" hidden>Password must contain at least 1 lowercase letter</p>
                 <p id="passwordIntReq" hidden>Password must contain at least 1 number</p>
                 <p id="passwordSpecialReq" hidden>Password must contain at least 1 special character</p>
             </div>
-            <div class="input__wrapper"> 
-                <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" class="form-control" required/>
                 <p id="phoneLengthReq" hidden>Phone number must be 10 digits long</p>
                 <p id="phoneTypeReq" hidden>Phone number must contain only numbers</p>
             </div>
-            <div class="input__wrapper"> 
-                <input type="text" name="address" id="address" placeholder="Address" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="address" id="address" placeholder="Address" class="form-control" required/>
                 <p id="addressLengthReq" hidden>Address must contain 50 characters or less</p>
             </div>
-            <div class="input__wrapper"> 
+            <div class="px-5"> 
                 <label>Security Question 1</label>
                 <select name="securityQ1" id="securityQ1" required>
                     <option>What is you're sibling's middle name?</option>
                     <option>What is the model and make of your first car?</option>
                     <option>What town were you born in?</option>
             </div>
-            <div class="input__wrapper"> 
-                <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="form-control" required/>
                 <p id="securityA1LengthReq" hidden>Answer must contain 50 characters or less</p>
             </div>
-            <div class="input__wrapper"> 
+            <div class="px-5"> 
                 <label>Security Question 2</label>
                 <select name="securityQ2" id="securityQ2"  required>
                     <option>What was the name of your first stuffed toy?</option>
                     <option>What was the exam you first failed</option>
                     <option>What was the name of your first pet?</option>
             </div>
-            <div class="input__wrapper"> 
-                <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="form-control" required/>
                 <p id="securityA2LengthReq" hidden>Answer must contain 50 characters or less</p>
             </div>
-            <div class="input__wrapper"> 
+            <div class="px-5"> 
                 <label>Security Question 3</label>
                 <select name="securityQ3" id="securityQ3" required>
                     <option>What was the name of the sporting team you first supported?</option>
                     <option>What was the concert you first went to?</option>
                     <option>In what city or town did your parents meet?</option>
             </div>
-            <div class="input__wrapper"> 
-                <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="input__field" required/>
+            <div class="px-5 py-2"> 
+                <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="form-control" required/>
                 <p id="securityA3LengthReq" hidden>Answer must contain 50 characters or less</p>
             </div>
             <div class="input__wrapper"> 

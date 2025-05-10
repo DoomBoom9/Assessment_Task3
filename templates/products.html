@@ -1,13 +1,15 @@
 {%extends "base.html"%}
 {%block title%}Products{%endblock%}
 {%block content%}
-<body>
-  <h1>Products</h1>
-  <h1>Featured</h1>
+
+<h1>Products</h1>
+<h1>Featured</h1>
+<div class="container px-5">
+  <input id="number_of_products" value="{{products|length}}" readonly hidden>
   <div class="row">
     {% for product in products %}
     <div class="col">
-      <div class="container p-5 my-5">
+      <div class="my-5">
         <div class="card" style="width:18rem">
           <img src={{product.image}} alt={{product.name}}> <!--404 occurs here due to invalid img source-->
           <div class="card-body">
@@ -17,12 +19,22 @@
               </div>
             </div>
           </div>
+          
+          <h5 class="card-text p-3">${{product.price}} {{product.unit}}</h5>
           <div class="row">
-            <div class="col-4">
-              <h5 class="card-text">${{product.price}} {{product.unit}}</h5>
+
+            <div class="col-12">
+              <button id="add_to_cart_{{product.id}}" class="btn text-light p-3 w-100" style="background-color: #609174;">Add to cart</button>
             </div>
-            <div class="col-8">
-              <a href="#" class="btn text-light p-3 w-100 rounded" style="background-color: #609174;">Add to cart</a>
+            <div id='cart_options_{{product.id}}' class="col-12" hidden>
+            
+              <input type="hidden" name="product_id" value="{{product.id}}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button id="minus_button_{{product.id}}">-</button>
+              <input type="number" min="0" id="cart_product_quantity_{{product.id}}">
+              <button id="plus_button_{{product.id}}">+</button>
+              <button id="confirm_cart_{{product.id}}">Confirm</button>
+            
             </div>
           </div>
         </div>
@@ -30,13 +42,14 @@
     </div>
     {%endfor%}
   </div>
+</div>
 
 
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script type="text/javascript" src="static/products.js"></script>
 
-  <!-- Optional JavaScript -->
-  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-</body>
 {%endblock%}
