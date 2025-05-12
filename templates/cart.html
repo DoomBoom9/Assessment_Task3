@@ -47,12 +47,12 @@
     <h3>Total: $ {{total}}</h3>
 
  
-    <form action="/checkout" method="POST">
+    <form action="/cart" method="POST">
         <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
         <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
         <button type="submit">Checkout</button>
     </form>
-    <form action="/clear_cart" method="POST">
+    <form action="/clear_cart" method="GET">
         <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
         <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
         <button type="submit">Clear Cart</button>

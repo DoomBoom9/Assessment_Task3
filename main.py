@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, session, redirect, abort
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_session import Session
-from sqlite_operations import *
 from validation import *
 import os
 from cryptography.fernet import Fernet
@@ -91,10 +90,11 @@ def admin_dashboard():
         abort(403)
 
 @limiter.limit(default)
-@app.route("/checkout")
+@app.route("/checkout", methods=['POST','GET'])
 def checkout_page():
     if request.method == 'POST':
 
+        print(request.form)
         session['checkout_info'] = checkoutInfo( #fix this somewhere
             request.form['first_name'],
             request.form['last_name'],
@@ -106,29 +106,27 @@ def checkout_page():
             request.form['shipping_state'],
             request.form['shipping_post_code'],
             request.form['shipping_address'],
-            request.form['payment_method'],
-            request.form['card_name'],
-            request.form['credit_card_number'],
-            request.form['expiration_date'],
-            request.form['cvv']
-
-
+            request.form['payment_type'],
+            request.form['full_name'],
+            request.form['cc_number'],
+            request.form['cc_expire'],
+            request.form['cc_cvv']
         )
 
-        session['authenitcation'] = True
+        session['authentication'] = True
 
-        redirect('/lower_stock_level') #redirects to the receipt page with the checkout info and cart items
+        return redirect('/lower_stock_level') #redirects to the receipt page with the checkout info and cart items
 
     if ('username' not in session):
-        redirect('/login')
-    else:
-        return render_template("checkout.html",  methods=['POST', 'GET'])
+        return redirect('/login')
+    
+    return render_template("checkout.html")
 
 @limiter.limit(default)
-@app.route("/cart",  methods=['POST', 'GET'])
+@app.route("/cart",  methods=['GET','POST'])
 def shopping_cart_page():
     if request.method == 'POST':
-        redirect('/checkout')
+        return redirect('/checkout')
 
     cart = session.get("cart", {})
     if not cart:
@@ -153,16 +151,11 @@ def about_page():
 @limiter.limit(default)
 @app.route("/receipt",  methods=['POST', 'GET'])
 def receipt_page(): #so you cant access this page without having bought something
-    if not session.get("username"):
-        abort(403)
-    if session['authentication'] == False or session['authentication'] == None:
-        abort(403)
+    session['authentication'] = False
 
+    order_info = get_order_by_id(session['order_id'])
 
-    
-    
-
-    render_template("receipt.html", user=session['checkout_info'], cart=session['cart']) #pass the cart to the receipt page
+    return render_template("receipt.html", user=session['checkout_info'], order=order_info ) #pass the cart to the receipt page
 
 #endregion
 
@@ -195,21 +188,23 @@ def add_to_cart(product_id, quantity):
 def lower_stock_level(): #pass some authentication after purchase
     if session['authentication'] == False or session['authentication'] == None:
         abort(403)
-    cart = session.get("cart", {})
+    cart = session['cart']
     if not cart: # check if it exists or if it is empty
         return render_template("error.html", error="Your cart is empty.")
     
     order_id = last_order_id() 
     user_id = get_UID(session['username']) #gets the user id
 
-    for product in cart:
-        if (product.stock_level - cart[product])<= 0:
+    for item in cart:
+        product = get_product_by_id(item)
+        if (product.stock_level - cart[item])<= 0:
             return render_template("error.html", error="Not enough stock available.") #fix this error at the end
         else:     
-            insert_order(order_id, product.id, user_id, session['cart'][product], product.price) #inserts the order into the database
-            deplete_stock_level(product, cart[product]) #updates the stock level of the product 
+            insert_order(order_id, product.id, user_id, cart[item], product.price) #inserts the order into the database
+            deplete_stock_level(product.id, cart[item]) #updates the stock level of the product 
                    
         session['cart'] = {}
+        session['order_id'] = order_id
     return redirect("/receipt") #redirects to the receipt page
     
 #endregion
@@ -456,7 +451,7 @@ def add_security_headers(resp):
 
 #endregion
 #region Error Handling
-@app.errorhandler(Exception)
+"""@app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f'{datetime.now()} Exception @ip={request.remote_addr}: {e}')
     return render_template('error.html', error='')
@@ -490,7 +485,7 @@ def page_not_found(e):
 def internal_error(e):
     app.logger.error(f'{datetime.now()} Internal Server Error @ip={request.remote_addr}: {e}')
     return render_template('error.html', error=500), 500
-#endregion
+#endregion"""
 
 #region misc needed in main
 def encrypt_input(input:str, cipher:str) -> str:

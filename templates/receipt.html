@@ -2,7 +2,7 @@
 {%block title%}Receipt{%endblock%}
 {%block pageName%}<div id="pageName">Receipt</div>{%endblock%}
 {%block content%}
-
+{{error}}
 <div class="container py-5 text-center rounded">
     <img class="mb-4 d-block mx-auto" alt="Company Logo" src="insert_logo_here" width="72" height="72">
     <h2>Receipt</h2>
@@ -59,7 +59,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for item in cart %}
+                {% for item in order %}
                 <tr>
                     <tdd>{{loop.index}}</td>
                     <td>{{item.name}}</td>
@@ -71,8 +71,8 @@
             </tbody>
             <tfoot>
                 {% set totals = [] %}
-                {% for item in cart %}
-                    {% if totals.append(cart[item]*item.price) %}{% endif %}
+                {% for item in order %}
+                    {% if totals.append(item.quantity*item.price) %}{% endif %}
                 {% endfor %}
                 {% set total = totals | sum %}
                 <tr>
