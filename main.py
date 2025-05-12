@@ -9,7 +9,7 @@ from cryptography.fernet import Fernet
 import logging
 import bcrypt
 import time
-from datetime import datetime
+from datetime import datetime, date
 from flask_wtf import CSRFProtect
 from werkzeug.exceptions import RequestEntityTooLarge
 from ORM.ORM_operations import *
@@ -93,11 +93,43 @@ def admin_dashboard():
 @limiter.limit(default)
 @app.route("/checkout")
 def checkout_page():
-    return render_template("checkout.html",  methods=['POST', 'GET'])
+    if request.method == 'POST':
+
+        session['checkout_info'] = checkoutInfo( #fix this somewhere
+            request.form['first_name'],
+            request.form['last_name'],
+            request.form['country'],
+            request.form['state'],
+            request.form['post_code'],
+            request.form['address'],
+            request.form['shipping_country'],
+            request.form['shipping_state'],
+            request.form['shipping_post_code'],
+            request.form['shipping_address'],
+            request.form['payment_method'],
+            request.form['card_name'],
+            request.form['credit_card_number'],
+            request.form['expiration_date'],
+            request.form['cvv']
+
+
+        )
+
+        session['authenitcation'] = True
+
+        redirect('/lower_stock_level') #redirects to the receipt page with the checkout info and cart items
+
+    if ('username' not in session):
+        redirect('/login')
+    else:
+        return render_template("checkout.html",  methods=['POST', 'GET'])
 
 @limiter.limit(default)
 @app.route("/cart",  methods=['POST', 'GET'])
 def shopping_cart_page():
+    if request.method == 'POST':
+        redirect('/checkout')
+
     cart = session.get("cart", {})
     if not cart:
         return render_template("cart.html", error="Your cart is empty.")
@@ -114,14 +146,24 @@ def products_page():
     return render_template("products.html", products=product_list)
 
 @limiter.limit(default)
-@app.route("/receipt",  methods=['POST', 'GET'])
-def receipt_page():
-    return render_template("receipt.html", user=user)
-
-@limiter.limit(default)
 @app.route("/about",  methods=['POST', 'GET'])
 def about_page():
     return render_template("about.html")
+
+@limiter.limit(default)
+@app.route("/receipt",  methods=['POST', 'GET'])
+def receipt_page(): #so you cant access this page without having bought something
+    if not session.get("username"):
+        abort(403)
+    if session['authentication'] == False or session['authentication'] == None:
+        abort(403)
+
+
+    
+    
+
+    render_template("receipt.html", user=session['checkout_info'], cart=session['cart']) #pass the cart to the receipt page
+
 #endregion
 
 #region Non-Displayable Routes
@@ -148,6 +190,28 @@ def add_to_cart(product_id, quantity):
     # Save the updated cart back into the session.
 
     return redirect("/")
+
+@app.route("/lower_stock_level")
+def lower_stock_level(): #pass some authentication after purchase
+    if session['authentication'] == False or session['authentication'] == None:
+        abort(403)
+    cart = session.get("cart", {})
+    if not cart: # check if it exists or if it is empty
+        return render_template("error.html", error="Your cart is empty.")
+    
+    order_id = last_order_id() 
+    user_id = get_UID(session['username']) #gets the user id
+
+    for product in cart:
+        if (product.stock_level - cart[product])<= 0:
+            return render_template("error.html", error="Not enough stock available.") #fix this error at the end
+        else:     
+            insert_order(order_id, product.id, user_id, session['cart'][product], product.price) #inserts the order into the database
+            deplete_stock_level(product, cart[product]) #updates the stock level of the product 
+                   
+        session['cart'] = {}
+    return redirect("/receipt") #redirects to the receipt page
+    
 #endregion
 
 #region Auths
@@ -434,6 +498,31 @@ def encrypt_input(input:str, cipher:str) -> str:
 
 def decrypt_input(input:str, cipher:str) -> str:
     return cipher.decrypt(input).decode()
+
+class checkoutInfo():
+    def __init__(self, first_name, last_name, country,
+                 state, post_code, address, shipping_country,
+                 shipping_state, shipping_post_code,
+                 shipping_address, payment_method, card_name,
+                 credit_card_number, expiration_date, cvv):
+        
+        self.first_name = first_name
+        self.last_name = last_name
+        self.country = country
+        self.state = state
+        self.post_code = post_code
+        self.address = address
+        self.shipping_country = shipping_country
+        self.shipping_state = shipping_state
+        self.shipping_post_code = shipping_post_code
+        self.shipping_address = shipping_address
+        self.payment_method = payment_method
+        self.card_name = card_name
+        self.credit_card_number = credit_card_number
+        self.expiration_date = expiration_date
+        self.cvv = cvv
+
+
 #endregion
 
 

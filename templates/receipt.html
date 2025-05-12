@@ -51,15 +51,17 @@
         <table>
             <thead>
                 <tr>
+                    <th>#</th>
                     <th>Item</th>
                     <th>Price</th>
                     <th>Quantity</th>
-                    <th>Total</th>
+                    <th>Subtotal</th>
                 </tr>
             </thead>
             <tbody>
-                {% for item in items %}
+                {% for item in cart %}
                 <tr>
+                    <tdd>{{loop.index}}</td>
                     <td>{{item.name}}</td>
                     <td>${{item.price}}</td>
                     <td>{{item.quantity}}</td>
@@ -68,13 +70,14 @@
                 {% endfor %}
             </tbody>
             <tfoot>
-                <tr>
-                    <td colspan="3">Subtotal</td>
-                    <td>${{subtotal}}</td>
-                </tr>
+                {% set totals = [] %}
+                {% for item in cart %}
+                    {% if totals.append(cart[item]*item.price) %}{% endif %}
+                {% endfor %}
+                {% set total = totals | sum %}
                 <tr>
                     <td colspan="3">Total</td>
-                    <td>${{total}}</td>
+                    <td>$ {{total}}</td>
                 </tr>
         </table>
         <hr class="my-4">

@@ -55,7 +55,6 @@ class Order(TimeStampedModel): #ONE TO MANY RELATION  uselist=True (default)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     quantity = Column(Integer, nullable=False)
     price = Column(REAL, nullable=False)
-    order_date = Column(DateTime, nullable=False)
 
 
     user = Relationship('User', back_populates='orders')
