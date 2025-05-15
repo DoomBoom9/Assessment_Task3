@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Order History{% endblock %}
+{% block content %}
+<div class="container p-5" style="background-color: lightgray ;"></div>
+    {% for order in order_history %}
+    <div class="card p-5" style="background-color: lightgray;">
+        {% set total = 0 %}
+        {{ loop.index }}
+        {% for item in order %}
+        
+            {% for product in products %}
+                {% if item.id == product.id %}
+                    <div class="card-body" style="background-color: aliceblue;">
+                        <div class="card-title">
+                            {{ product_name }}
+                        </div>
+                        <img src="{{ product.picture }}">
+                    
+                    
+                        <div class="card-text">
+                        {{ product.description }}
+                        </div>
+                    </div>
+                    <div class="card-text">
+                        <p>Quantity: {{ item.quantity }}</p>
+                        {{ product_price }}
+                        <p>Subtotal: {{ item.subtotal }}</p>
+                    </div>
+                    
+                    {% set total = total + item.subtotal %}
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+        <h2>Total: {{ total }}</h2>
+    </div>
+            
+    {% endfor %}
+{% endblock %}

@@ -55,6 +55,7 @@ class Order(TimeStampedModel): #ONE TO MANY RELATION  uselist=True (default)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
     quantity = Column(Integer, nullable=False)
     price = Column(REAL, nullable=False)
+    subtotal = Column(REAL, nullable=False)
 
 
     user = Relationship('User', back_populates='orders')
@@ -74,13 +75,22 @@ class Product(TimeStampedModel):
     unit = Column(String(50), nullable=False)
     price = Column(REAL, nullable=False)
     stock_level = Column(Integer, nullable=False)
-    category = Column(String(50), nullable=False)
+    category = Column(Integer, ForeignKey('categories.id'), nullable=False, index=True)
     image = Column(String(100), nullable=False)
 
     orders = Relationship('Order', back_populates='product')
+    categories = Relationship('Category', back_populates='product')
 
     def __repr__(self):
        return f"<{self.__class__.__name__} id={self.id} name={self.name} description={self.description} dimensions={self.dimensions} weight={self.weight} unit={self.unit} price={self.price} stock_level={self.stock_level} category={self.category} image={self.image}>"
+    
+class Category(TimeStampedModel):
+    __tablename__  = 'categories'
+
+    id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    category = Column(String(40), nullable=False)
+
+    product = Relationship('Product', back_populates='categories')
     
 class Role(TimeStampedModel): #MANY TO MANY RELATION 
     __tablename__ = 'roles'

@@ -27,12 +27,7 @@
             
             
             <td>
-                <form action="/remove_from_cart" method="POST">
-                    <input type="hidden" name="item_id" value="{{item.id}}">
-                    <button type="submit">Remove</button>
-                    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
-                    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
-                </form>
+                <h3>REMOVE BUTTON REMEMBER TO PUT IN WHEN THINGS LOOK PRETTIER</h3>
             </td>
         </tr>
         {%endfor%}

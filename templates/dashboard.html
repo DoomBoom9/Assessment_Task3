@@ -9,8 +9,8 @@
         <div class="layout_wrapper">
         
             <div class="centre">
-                <h3>Welcome {{username}}!<h3>
-                <img src="{{picture}}" alt="User profile picture"> <!--src image must be changed when parsed as a variable-->
+                <h3>Welcome {{user.username}}!<h3>
+                <img src="{{user.picture}}" alt="User profile picture"> <!--src image must be changed when parsed as a variable-->
                 <h2>Change Profile Picture</h2>
 
                 <form action="/dashboard" method="POST" enctype="multipart/form-data">
@@ -29,18 +29,18 @@
     <div class="child">
         <div class="layout_wrapper">
             <h2>Phone Number</h2>
-            <h3>{{phone_number}}</h3>
+            <h3>{{user.phone_number}}</h3>
             <br>
             <h2>Address</h2>
-            <h3>{{address}}</h3>
+            <h3>{{user.address}}</h3>
             <br>
             <h2>Security Questions</h2>
-            <h3>{{securityQ1}}</h3>
-            <h3>{{securityQ2}}</h3>
-            <h3>{{securityQ3}}</h3>
-
+            <h3>{{user.securityQ1}}</h3>
+            <h3>{{user.securityQ2}}</h3>
+            <h3>{{user.securityQ3}}</h3>
         </div>
     </div>
 </div>
+<a href="{{url_for('order_history_page')}}">Order History</a>
 <script src="static/script.js"></script>
 {%endblock%}

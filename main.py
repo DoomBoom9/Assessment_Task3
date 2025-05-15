@@ -66,12 +66,24 @@ def dashboard():
         user_info[4] = decrypt_input(user_info[4], cipher) #decrypt Phone num for display
         
         app.logger.info('Dashboard Loaded')
+        user_id = get_UID(session['username'])
+        orders = get_order_history(user_id)
+        user_obj = get_user(session['username'])
 
-        return render_template("dashboard.html",username=username, securityQ1=user_info[0], securityQ2=user_info[1], securityQ3=user_info[2], address=user_info[3], phone_number=user_info[4], picture=user_info[5]) 
+        return render_template("dashboard.html", user=user_obj ,order_history = orders) 
     else:
         abort(403) #redirects to login page if not logged in
         #realistically there should be a popup saying not logged in with some js or whatnot
 
+@limiter.limit(default)
+@app.route("/order_history")
+def order_history_page():
+    user_id = get_UID(session['username'])
+    order_list = get_order_history(user_id)
+    order_list = group_order_history(order_list)
+    product_list  = get_products()
+    return render_template('order_history.html', order_history=order_list, products=product_list)
+    
 
 @limiter.limit(default)
 @app.route("/admin_dashboard")
@@ -141,7 +153,8 @@ def shopping_cart_page():
 @app.route("/", methods=['POST', 'GET'])
 def products_page():
     product_list = get_products()
-    return render_template("products.html", products=product_list)
+    category_list = get_categories()
+    return render_template("products.html", products=product_list, categories=category_list)
 
 @limiter.limit(default)
 @app.route("/about",  methods=['POST', 'GET'])
@@ -151,6 +164,8 @@ def about_page():
 @limiter.limit(default)
 @app.route("/receipt",  methods=['POST', 'GET'])
 def receipt_page(): #so you cant access this page without having bought something
+    if session['order_id'] == None or session['order_id'] == False:
+        render_template('receipt.html', error='Sorry, No order exists or session has timed out! please visit the dashboard to view order history.')
     session['authentication'] = False
 
     order_info = get_order_by_id(session['order_id'])
@@ -160,6 +175,57 @@ def receipt_page(): #so you cant access this page without having bought somethin
 #endregion
 
 #region Non-Displayable Routes
+@app.route("/sort_products_<string:sort_type>")
+def sort_products(sort_type):
+    if sort_type not in ['low-high', 'high-low', 'a-z', 'z-a']:
+        return redirect('/')
+    products = get_products()
+    category_list = get_categories()
+
+    if sort_type == 'low-high':
+        sorted_list = sorted(products, key=lambda x: x.price, reverse=False)
+        #return some function with new list
+        return render_template('products.html', products=sorted_list, categories=category_list)
+    if sort_type == 'high-low':
+        sorted_list = sorted(products, key=lambda x: x.price, reverse=True)
+        #return some function with new list
+        return render_template('products.html', products=sorted_list, categories=category_list)
+    if sort_type == 'a-z':
+        sorted_list = sorted(products, key=lambda x: x.name, reverse=False)
+        return render_template('products.html', products=sorted_list, categories=category_list)
+    if sort_type == 'z-a':
+        sorted_list = sorted(products, key=lambda x: x.name, reverse=True)
+        return render_template('products.html', products=sorted_list, categories=category_list)
+
+@app.route("/remove_from_cart/<int:product_id>_<int:quantity>")
+def remove_from_cart(product_id, quantity):
+    cart = session['cart']
+    product_id = str(product_id)
+     
+    if product_id not in cart:
+        return #error where item is not in cart
+    if quantity > cart[product_id]: 
+        return redirect('/cart') #error where specified quantity is too large
+    if quantity < 0:
+        return redirect("/cart") #cannot remove a negative quantity for some error
+    else:
+        if quantity == 0:
+            session['cart'] = cart.pop(product_id)
+            return redirect('/cart')
+        else:
+            
+            session['cart'] = cart[product_id] - quantity
+            return redirect('/cart')
+
+@app.route('/clear_cart')
+def clear_cart():
+    if not session['cart']:
+        return redirect('/cart') #cart does not exist for some error
+    else:
+        session['cart'] = {}
+        return redirect('/cart')
+        
+
 @app.route("/add_to_cart/<int:product_id>_<int:quantity>")   # Add to cart by product_id
 def add_to_cart(product_id, quantity):
     
@@ -171,8 +237,6 @@ def add_to_cart(product_id, quantity):
     else:
         cart[product_id_str] += quantity
  
-
-
     # IMPORTANT - Convert product_id to a string (because session keys are strings).  
     # If the product is already in the cart, increase the quantity by 1.
     # If not, start with 0 and add 1.
@@ -192,7 +256,7 @@ def lower_stock_level(): #pass some authentication after purchase
     if not cart: # check if it exists or if it is empty
         return render_template("error.html", error="Your cart is empty.")
     
-    order_id = last_order_id() 
+    order_id = last_order_id() + 1
     user_id = get_UID(session['username']) #gets the user id
 
     for item in cart:
@@ -200,7 +264,8 @@ def lower_stock_level(): #pass some authentication after purchase
         if (product.stock_level - cart[item])<= 0:
             return render_template("error.html", error="Not enough stock available.") #fix this error at the end
         else:     
-            insert_order(order_id, product.id, user_id, cart[item], product.price) #inserts the order into the database
+            subtotal = product.price * cart[item]
+            insert_order(order_id, product.id, user_id, cart[item], product.price, subtotal) #inserts the order into the database
             deplete_stock_level(product.id, cart[item]) #updates the stock level of the product 
                    
         session['cart'] = {}
@@ -484,8 +549,8 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_error(e):
     app.logger.error(f'{datetime.now()} Internal Server Error @ip={request.remote_addr}: {e}')
-    return render_template('error.html', error=500), 500
-#endregion"""
+    return render_template('error.html', error=500), 500"""
+#endregion
 
 #region misc needed in main
 def encrypt_input(input:str, cipher:str) -> str:
@@ -516,6 +581,30 @@ class checkoutInfo():
         self.credit_card_number = credit_card_number
         self.expiration_date = expiration_date
         self.cvv = cvv
+
+def group_order_history(order_history:list) -> list: #turns list of Order objects into a 2d array, with subarray groupings by order_id
+    lst = []
+    sub_list = []
+    previous_order_id = None
+    i = 0
+    while i < len(order_history):
+        if previous_order_id is None:
+            previous_order_id = order_history[i].order_id
+        if order_history[i].order_id == previous_order_id:
+            sub_list.append(order_history[i])
+            i += 1
+            if i == len(order_history):
+                lst.append(sub_list)
+        else:
+            lst.append(sub_list)
+            sub_list = []
+            previous_order_id = order_history[i].order_id
+    return lst
+
+ 
+
+
+
 
 
 #endregion

@@ -21,6 +21,10 @@ def get_product_by_id(product_id):
     product = Product.query.filter(Product.id == product_id).first()
     return product
 
+def get_user(username):
+    user = User.query.filter(User.username == username).first()
+    return user
+
 def deplete_stock_level(product_id, quantity):
     product = get_product_by_id(product_id)
     if product:
@@ -42,16 +46,17 @@ def last_order_id():
     with engine.connect() as connection:
         cursor = connection.execute(text("SELECT MAX(order_id) FROM order_history"))
         cursor = cursor.fetchone()
-        if cursor == None:
-            return 1
-        else:
-            for value in cursor:
-               return value
-def insert_order(order_id, product_id, user_id, quantity, price):
+        for value in cursor:
+            if value == None:
+                return 0
+            else: 
+                return value
+
+def insert_order(order_id, product_id, user_id, quantity, price, subtotal):
     with engine.connect() as connection:
         connection.execute(text(
-            "INSERT INTO order_history (order_id, product_id, user_id, quantity, price) VALUES (:a, :b, :c, :d, :e)"),
-            {"a":order_id, "b":product_id, "c":user_id, "d":quantity, "e":price}
+            "INSERT INTO order_history (order_id, product_id, user_id, quantity, price, subtotal) VALUES (:a, :b, :c, :d, :e, :f)"),
+            {"a":order_id, "b":product_id, "c":user_id, "d":quantity, "e":price, "f":subtotal}
         )
         connection.commit()
 
@@ -74,39 +79,66 @@ def checkValidUser(username): #will have to change with hashing algorithm
         res = connection.execute(text(
             "SELECT username FROM users WHERE username=:a;"),{"a": username}
         )
-    if len(res.fetchall()) == 0:
-        return False
-    else:
-        return True
+        if len(res.fetchall()) == 0:
+            return False
+        else:
+            return True
 
 #gets return a list or list element since jinja2 cannot display tuples or elements of a tuple
 #tuples are converted
+
+def get_categories() -> list:
+    res = []
+    categories = Category.query.all()
+    for category in categories:
+        res.append(category)
+    return res
+
+def get_order_history(user_id):
+    with engine.connect() as connection:
+        res = []
+        order = Order.query.filter(Order.user_id == user_id).all()
+        for value in order:
+            res.append(value)
+        return res
+
 def get_privilage(username):
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT role FROM users WHERE username=:a;"), {"a": username}
         )
-    role = res.fetchone()
+
+        role = []
+        res = res.fetchone()
+        for value in res:
+            role.append(value)
+        
     
-    return role[0]
+        return role[0]
 
 def get_UID(username):
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT id FROM users WHERE username=:a;"), {"a": username}
         )
-    uid = res.fetchone()
+        uid = []
+        res = res.fetchone()
+        for value in res:
+            uid.append(value)
     
-    return uid[0]
+        return uid[0]
 
 def get_password(id):
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT password FROM users WHERE id=:a;"), {"a": id}
         )
-    hash = res.fetchone()
+        password = []
+        res = res.fetchone()
+        for value in res:
+            password.append(value)
     
-    return hash[0]
+        return password[0] #returns hashed password that's stored in the db.
 
 
 def get_displayables(username:str) -> list:
@@ -114,30 +146,38 @@ def get_displayables(username:str) -> list:
         res = connection.execute(text(
             "SELECT securityQ1, securityQ2, securityQ3, address, phone_number, picture FROM users WHERE username=:a;"), {"a": username}
         )
-    user = res.fetchone()
-     
-    user = list(user) #must cnvrt to list since tuples are immutable and you can't pass them into jinja2
-    return user
+        user = []
+        res = res.fetchone()
+        for value in res:
+            user.append(value)
+        
+        return user
 
 def get_security_questions(username:str) -> list:
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT securityQ1, securityQ2, securityQ3 FROM users WHERE username=:a;"), {"a": username}
         )
-    user = res.fetchone()
-     
-    user = list(user) #must cnvrt to list since tuples are immutable and you can't pass them into jinja2
-    return user
+        user = []
+        res = res.fetchone()
+        for value in res:
+            user.append(value)
+
+        return user
     
 def get_security_answers(username:str) -> list:
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT securityA1, securityA2, securityA3 FROM users WHERE username=:a;"), {"a": username}
         )
-    user = res.fetchone()
+
+        answers = []
+        res = res.fetchone()
+
+        for value in res:
+            answers.append(value)
      
-    user = list(user) #must cnvrt to list since tuples are immutable and you can't pass them into jinja2
-    return user
+        return answers
 
 
 def get_last_attempt(username):
@@ -145,30 +185,37 @@ def get_last_attempt(username):
         res = connection.execute(text(
             "SELECT last_attempt FROM users WHERE username=:a;"), {"a": username}
         )
-    last_attempt = res.fetchone()
-     
-    last_attempt = list(last_attempt)
-    return last_attempt[0]
+    
+        last_attempt = []
+        res = res.fetchone()
+        for value in res:
+            last_attempt.append(value)
+        return last_attempt[0]
 
 def get_picture(uid) -> str:
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT picture FROM users WHERE id=:a;"), {"a": uid}
         )
-    picture = res.fetchone()
-    picture = list(picture)
     
-    return picture[0]
+        picture = []
+        res = res.fetchone()
+        for value in res:
+            picture.append(value)
+        
+        return picture[0]
 
 def get_attempts(username) -> list:
     with engine.connect() as connection:
         res = connection.execute(text(
             "SELECT attempts FROM users WHERE username=:a;"), {"a": username}
         )
-    attempts = res.fetchone()
-    
-    attempts = list(attempts)
-    return attempts[0]
+
+        attempts = []
+        res = res.fetchone()
+        for value in res:
+            attempts.append(value)
+        return attempts[0]
 #endregion
 
 #region Updates
@@ -203,4 +250,4 @@ def update_attempts(username, attempts:int):
 #endregion
 
 if __name__ == "__main__":
-    insertUser('test', 'test', 'test', 'test', 'test', 'test', 'test', 'test', 'test', 1234567890, default_image_dir, 0.0)
+    pass
