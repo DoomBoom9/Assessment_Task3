@@ -43,7 +43,7 @@ function event_listener_id() {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-    for (var i = 1; i <= document.getElementById('number_of_products').value; i++){
+    for (var i = 1; i <= document.getElementById('number_of_categories').value; i++){
         var category = document.querySelectorAll(`[data-category="${i}"]`);
         document.getElementById(`cat_${i}_text`).innerHTML = `(${category.length})`;
     }

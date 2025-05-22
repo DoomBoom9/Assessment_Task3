@@ -1,38 +1,77 @@
 {% extends "base.html" %}
 {% block title %}Order History{% endblock %}
 {% block content %}
-<div class="container p-5" style="background-color: lightgray ;"></div>
-    {% for order in order_history %}
-    <div class="card p-5" style="background-color: lightgray;">
-        {% set total = 0 %}
-        {{ loop.index }}
-        {% for item in order %}
-        
-            {% for product in products %}
-                {% if item.id == product.id %}
-                    <div class="card-body" style="background-color: aliceblue;">
-                        <div class="card-title">
-                            {{ product_name }}
-                        </div>
-                        <img src="{{ product.picture }}">
-                    
-                    
-                        <div class="card-text">
-                        {{ product.description }}
-                        </div>
-                    </div>
-                    <div class="card-text">
-                        <p>Quantity: {{ item.quantity }}</p>
-                        {{ product_price }}
-                        <p>Subtotal: {{ item.subtotal }}</p>
-                    </div>
-                    
-                    {% set total = total + item.subtotal %}
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-        <h2>Total: {{ total }}</h2>
-    </div>
+    <div class="container" style="padding-top: 5rem;">
+        <div class="p-4">
+            <h1 class="mb-4">Order history</h1>
             
-    {% endfor %}
+            <div class="row">
+                <!-- Left sidebar - Refine options -->
+                <div class="col-md-3">
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Sort</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><a href="/order_history" class="text-dark">Default</a></li>
+                                <li><a href="/sort_orders_earliest" class="text-dark">Date: Earliest</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Main order history content -->
+                <div class="col-md-9">
+                    {% for order in order_history %}
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <div class="d-flex justify-content-between">
+                                <h5 class="mb-0">Order Number: {{order[0].order_id}}</h5>
+                                <small class="text-muted">{{ order.date if order.date else '' }}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            {% for item in order %}
+                                {% for product in products %}
+                                    {% if item.product_id == product.id %}
+                                    <div class="mb-3 pb-3 border-bottom">
+                                        <div class="d-flex">
+                                            <div class="me-3">
+                                                <img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail" style="width: 80px; height: 80px; object-fit: cover;">
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <div>
+                                                        <h6 class="mb-1">{{ product.name }}</h6>
+                                                    </div>
+                                                    <div class="text-right">
+                                                        <div>Subtotal: ${{ item.subtotal }}</div>
+                                                    </div>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <small>Quantity: {{ item.quantity }}</small>
+                                                </div>
+                                                <div class="mt-2">
+                                                    <small>Unit Price: ${{ product.price }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                            
+                            <div class="text-end mt-3">  <!-- Changed to text-end for right alignment -->
+                                <h5 class="mb-0">Total: ${{ order | sum(attribute='subtotal')}}</h5>
+                                <small class="text-muted">Paid with {{ order.payment_method if order.payment_method else 'Microsoft account' }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

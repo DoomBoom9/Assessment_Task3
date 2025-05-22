@@ -157,6 +157,13 @@ def products_page():
     return render_template("products.html", products=product_list, categories=category_list)
 
 @limiter.limit(default)
+@app.route("/product_view_<int:product_id>", methods=['POST', 'GET'])
+def product_view(product_id):
+    product_obj = get_product_by_id(product_id)
+    return render_template("product_view.html", product=product_obj)
+
+
+@limiter.limit(default)
 @app.route("/about",  methods=['POST', 'GET'])
 def about_page():
     return render_template("about.html")
@@ -175,6 +182,20 @@ def receipt_page(): #so you cant access this page without having bought somethin
 #endregion
 
 #region Non-Displayable Routes
+@app.route('/sort_orders_<string:sort_type>')
+def sort_orders(sort_type):
+    if sort_type != 'earliest':
+        return redirect('/order_history')
+    if not session['username']:
+        return ValueError('Username not in session')
+    product_list  = get_products()
+    id = get_UID(session['username'])
+    orders = get_order_history(id)
+    orders = group_order_history(orders)
+    orders = orders[::-1]
+    return render_template('order_history.html', products=product_list, order_history=orders)
+    
+    
 @app.route("/sort_products_<string:sort_type>")
 def sort_products(sort_type):
     if sort_type not in ['low-high', 'high-low', 'a-z', 'z-a']:

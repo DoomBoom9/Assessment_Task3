@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Products{% endblock %}
+{% block content %}
+    {{product.name}}
+    <img src="{{product.image}}">
+    {{product.description}}
+    {{product.unit}}
+    {{product.price}}
+    {{product.stock_level}}
+
+    <p>Specifications</p>
+    {{product.dimensions}}
+    {{product.weight}}
+
+{% endblock %}

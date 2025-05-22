@@ -1,82 +1,110 @@
 {% extends "base.html" %}
-{%block title%}Register{%endblock%}
+{% block title %}Register{% endblock %}
 {% block content %}
 {% autoescape false %}
-<h3>{{error}}</h3>
-<form action="/register" id='form' method="POST" class="box" enctype='multipart/form-data'>
-    <div class="align">
-        <div class='container py-5 rounded' style="background-color: lightgray">
-            <h1>Register</h1>
-            <div class="px-5 py-2"> 
-                <input type="text" name="username" id="username" placeholder="Username" class="form-control" required/>
-                <p id="usernameLengthReq" hidden>Username must be less than 26 characters!</p>
-            </div>
-            <div class="px-5 py-2">
-                <input type="password" name="password" id="password" placeholder="Password" class="form-control" required/>
-                <p id="passwordLengthReq" hidden>Password must be greater than 11 and less than 26 characters</p>
-                <p id="passwordUpperReq" hidden>Password must contain at least 1 uppercase letter</p>
-                <p id="passwordLowerReq" hidden>Password must contain at least 1 lowercase letter</p>
-                <p id="passwordIntReq" hidden>Password must contain at least 1 number</p>
-                <p id="passwordSpecialReq" hidden>Password must contain at least 1 special character</p>
-            </div>
-            <div class="px-5 py-2"> 
-                <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" class="form-control" required/>
-                <p id="phoneLengthReq" hidden>Phone number must be 10 digits long</p>
-                <p id="phoneTypeReq" hidden>Phone number must contain only numbers</p>
-            </div>
-            <div class="px-5 py-2"> 
-                <input type="text" name="address" id="address" placeholder="Address" class="form-control" required/>
-                <p id="addressLengthReq" hidden>Address must contain 50 characters or less</p>
-            </div>
-            <div class="px-5"> 
-                <label>Security Question 1</label>
-                <select name="securityQ1" id="securityQ1" required>
-                    <option>What is you're sibling's middle name?</option>
-                    <option>What is the model and make of your first car?</option>
-                    <option>What town were you born in?</option>
-            </div>
-            <div class="px-5 py-2"> 
-                <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="form-control" required/>
-                <p id="securityA1LengthReq" hidden>Answer must contain 50 characters or less</p>
-            </div>
-            <div class="px-5"> 
-                <label>Security Question 2</label>
-                <select name="securityQ2" id="securityQ2"  required>
-                    <option>What was the name of your first stuffed toy?</option>
-                    <option>What was the exam you first failed</option>
-                    <option>What was the name of your first pet?</option>
-            </div>
-            <div class="px-5 py-2"> 
-                <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="form-control" required/>
-                <p id="securityA2LengthReq" hidden>Answer must contain 50 characters or less</p>
-            </div>
-            <div class="px-5"> 
-                <label>Security Question 3</label>
-                <select name="securityQ3" id="securityQ3" required>
-                    <option>What was the name of the sporting team you first supported?</option>
-                    <option>What was the concert you first went to?</option>
-                    <option>In what city or town did your parents meet?</option>
-            </div>
-            <div class="px-5 py-2"> 
-                <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="form-control" required/>
-                <p id="securityA3LengthReq" hidden>Answer must contain 50 characters or less</p>
-            </div>
-            <div class="input__wrapper"> 
-                <input type="file" id="file" name="file" required>
-                <p id="fileSizeReq" hidden>File must be 2mb or less</p>
-                <p id="fileTypeReq" hidden>File must be valid type: .jpeg .jpg .png</p>
-                
-            </div>            
-            <div class="input__wrapper">
-                <input type="submit" id="submit" value="Register"/>
-            </div>
+
+<!-- Full-page white background with more top padding -->
+<div class="d-flex justify-content-center align-items-start min-vh-100" style="background-color: white; padding-top: 100px; padding-bottom: 50px;">
+    <form action="/register" id="form" method="POST" enctype="multipart/form-data"
+        class="rounded shadow p-4 border"
+        style="width: 100%; max-width: 600px; background-color: #e0e0e0;">
+
+        <h2 class="fw-bold text-center mb-4">Register</h2>
+        <h4 class="text-danger text-center">{{ error }}</h4>
+
+        <!-- Username -->
+        <div class="mb-3">
+            <input type="text" name="username" id="username" placeholder="Username" class="form-control" required />
+            <p id="usernameLengthReq" class="text-danger small" hidden>Username must be less than 26 characters!</p>
         </div>
-    </div>
-    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
-    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
-</form>
+
+        <!-- Password -->
+        <div class="mb-3">
+            <input type="password" name="password" id="password" placeholder="Password" class="form-control" required />
+            <p id="passwordLengthReq" class="text-danger small" hidden>Password must be 12–25 characters.</p>
+            <p id="passwordUpperReq" class="text-danger small" hidden>Must include at least 1 uppercase letter.</p>
+            <p id="passwordLowerReq" class="text-danger small" hidden>Must include at least 1 lowercase letter.</p>
+            <p id="passwordIntReq" class="text-danger small" hidden>Must include at least 1 number.</p>
+            <p id="passwordSpecialReq" class="text-danger small" hidden>Must include at least 1 special character.</p>
+        </div>
+
+        <!-- Phone -->
+        <div class="mb-3">
+            <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" class="form-control" required />
+            <p id="phoneLengthReq" class="text-danger small" hidden>Phone number must be 10 digits.</p>
+            <p id="phoneTypeReq" class="text-danger small" hidden>Only numeric characters allowed.</p>
+        </div>
+
+        <!-- Address -->
+        <div class="mb-3">
+            <input type="text" name="address" id="address" placeholder="Address" class="form-control" required />
+            <p id="addressLengthReq" class="text-danger small" hidden>Address must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Security Q1 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 1</label>
+            <select name="securityQ1" id="securityQ1" class="form-select" required>
+                <option>What is your sibling's middle name?</option>
+                <option>What is the model and make of your first car?</option>
+                <option>What town were you born in?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="form-control" required />
+            <p id="securityA1LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Security Q2 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 2</label>
+            <select name="securityQ2" id="securityQ2" class="form-select" required>
+                <option>What was the name of your first stuffed toy?</option>
+                <option>What was the exam you first failed?</option>
+                <option>What was the name of your first pet?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="form-control" required />
+            <p id="securityA2LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Security Q3 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 3</label>
+            <select name="securityQ3" id="securityQ3" class="form-select" required>
+                <option>What was the name of the sporting team you first supported?</option>
+                <option>What was the concert you first went to?</option>
+                <option>In what city or town did your parents meet?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="form-control" required />
+            <p id="securityA3LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- File Upload -->
+        <div class="mb-3">
+            <label for="file" class="form-label">Upload ID</label>
+            <input type="file" id="file" name="file" class="form-control" required />
+            <p id="fileSizeReq" class="text-danger small" hidden>File must be 2MB or less.</p>
+            <p id="fileTypeReq" class="text-danger small" hidden>File must be .jpeg, .jpg, or .png.</p>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-grid mb-3">
+            <input type="submit" id="submit" value="Register" class="btn btn-primary btn-lg" />
+        </div>
+
+        <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+        <input type="hidden" id="token" name="csrf_token" value="{{ csrf_token() }}" />
+    </form>
+</div>
 
 <script src="static/script.js"></script>
 
 {% endautoescape %}
-{%endblock%}
+{% endblock %}
