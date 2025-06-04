@@ -3461,3 +3461,5 @@ jinja2.exceptions.TemplateNotFound: error.html
 2025-05-13 11:24:20.877116 Type Error @ip=127.0.0.1: list.append() takes exactly one argument (0 given)
 2025-05-13 11:24:20.925630 Page not found @ip=127.0.0.1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
 2025-05-13 11:24:20.936468 Page not found @ip=127.0.0.1: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+2025-05-30 13:37:24.925476 No username stored in session but dashboard was accessed @ip=127.0.0.1
+2025-05-30 13:37:32.576823 No username stored in session but dashboard was accessed @ip=127.0.0.1

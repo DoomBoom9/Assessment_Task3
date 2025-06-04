@@ -4,43 +4,100 @@
 {%block content%}
 <link rel="stylesheet" href="{{url_for('static', filename='dashboard.css')}}">
 <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
-<div class="parent">
-    <div class="child">
-        <div class="layout_wrapper">
-        
-            <div class="centre">
-                <h3>Welcome {{user.username}}!<h3>
-                <img src="{{user.picture}}" alt="User profile picture"> <!--src image must be changed when parsed as a variable-->
-                <h2>Change Profile Picture</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-                <form action="/dashboard" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="file" required>
-                    <br><br>
-                    <button type="submit">Upload</button>
-                    <input type="hidden" id='token' name="csrf_token" value = "{{ csrf_token() }}" />
-                    <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
-                </form>
 
-                <a href="/logout">Log out</a>
+<div class="container-fluid px-5" style="padding-top: 5rem; padding-bottom: 5rem;">
+    <div class="row">
+        <!-- Left Column - Profile Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h3 class="card-title mb-4">Welcome {{user.username}}!</h3>
+                    
+                    <div class="mb-4">
+                        <img src="{{user.picture}}" alt="User profile picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                    </div>
+                    
+                    <h5 class="mb-3">Change Profile Picture</h5>
+                    
+                    <form action="/dashboard" method="POST" enctype="multipart/form-data" class="mb-4">
+                        <div class="mb-3">
+                            <input class="form-control" type="file" name="file" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <input type="hidden" id='token' name="csrf_token" value="{{ csrf_token() }}" />
+                        <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+                    </form>
+                    
+                    <a href="/logout" class="btn btn-outline-danger">Log out</a>
+                </div>
             </div>
-            
+        </div>
+        
+        <!-- Right Column - User Info Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Account Information</h4>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>Phone Number</h5>
+                                <p class="text-muted">{{phone_number}}</p>
+                            </div>
+                            <a href="/change_phone_number" class="btn btn-outline-warning btn-sm">Update</a>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5>Address</h5>
+                                <p class="text-muted">{{address}}</p>
+                            </div>
+                            <a href="/change_address" class="btn btn-outline-info btn-sm">Update</a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5>Security Questions</h5>
+                        <ul class="list-unstyled text-muted">
+                            <li class="mb-2">{{user.securityQ1}}</li>
+                            <li class="mb-2">{{user.securityQ2}}</li>
+                            <li>{{user.securityQ3}}</li>
+                        </ul>
+                        <a href="/change_security_questions" class="btn btn-outline-secondary btn-sm">Change Security Questions</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-    <div class="child">
-        <div class="layout_wrapper">
-            <h2>Phone Number</h2>
-            <h3>{{user.phone_number}}</h3>
-            <br>
-            <h2>Address</h2>
-            <h3>{{user.address}}</h3>
-            <br>
-            <h2>Security Questions</h2>
-            <h3>{{user.securityQ1}}</h3>
-            <h3>{{user.securityQ2}}</h3>
-            <h3>{{user.securityQ3}}</h3>
+    
+    <!-- Order History Link -->
+    <div class="row mt-3">
+        <div class="col-12 text-center">
+            <a href="{{url_for('order_history_page')}}" class="btn btn-success">View Order History</a>
+        </div>
+    </div>
+    
+    <!-- Quick Links Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Quick Actions</h4>
+                    <div class="d-flex justify-content-between">
+                        <a href="/" class="btn btn-outline-primary">Shop Products</a>
+                        <a href="/cart" class="btn btn-outline-secondary">View Cart</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-<a href="{{url_for('order_history_page')}}">Order History</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="static/script.js"></script>
 {%endblock%}

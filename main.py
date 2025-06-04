@@ -54,8 +54,7 @@ default = "1 per second" #debug var to change the limiter
 @limiter.limit(default)
 def dashboard():
     if ('username' not in session):
-        app.logger.warning(f'{datetime.now()} No username stored in session but dashboard was accessed @ip={request.remote_addr}')
-        abort(403)
+        return redirect('/login')
     if ('role' not in session):
         app.logger.warning(f'{datetime.now()} No role stored in session but dashboard was accessed @ip={request.remote_addr}')
         abort(403)
@@ -66,11 +65,9 @@ def dashboard():
         user_info[4] = decrypt_input(user_info[4], cipher) #decrypt Phone num for display
         
         app.logger.info('Dashboard Loaded')
-        user_id = get_UID(session['username'])
-        orders = get_order_history(user_id)
         user_obj = get_user(session['username'])
 
-        return render_template("dashboard.html", user=user_obj ,order_history = orders) 
+        return render_template("dashboard.html", user=user_obj, address=user_info[3], phone_number=user_info[4])
     else:
         abort(403) #redirects to login page if not logged in
         #realistically there should be a popup saying not logged in with some js or whatnot
@@ -89,7 +86,7 @@ def order_history_page():
 @app.route("/admin_dashboard")
 def admin_dashboard():
     if ('username' not in session):
-        abort(403)
+        redirect('/login')
     if ('role' not in session):
         abort(403)
     if ('username' in session) & (session['role'] == 1): #checks for valid session and role
@@ -137,16 +134,13 @@ def checkout_page():
 @limiter.limit(default)
 @app.route("/cart",  methods=['GET','POST'])
 def shopping_cart_page():
+    object_quantity_dict= item_object_quantity_dict()
+
     if request.method == 'POST':
         return redirect('/checkout')
-
     cart = session.get("cart", {})
     if not cart:
         return render_template("cart.html", error="Your cart is empty.")
-    object_quantity_dict = {}
-    for i in cart.keys():
-        object_quantity_dict[get_product_by_id(i)] = cart[i] #creates a dictionary of the products in the cart
-    print(object_quantity_dict)
     return render_template("cart.html", cart=object_quantity_dict) 
 
 @limiter.limit("5 per second")
@@ -160,6 +154,8 @@ def products_page():
 @app.route("/product_view_<int:product_id>", methods=['POST', 'GET'])
 def product_view(product_id):
     product_obj = get_product_by_id(product_id)
+    if product_obj == None:
+        abort(404)
     return render_template("product_view.html", product=product_obj)
 
 
@@ -220,6 +216,8 @@ def sort_products(sort_type):
 
 @app.route("/remove_from_cart/<int:product_id>_<int:quantity>")
 def remove_from_cart(product_id, quantity):
+    if quantity == 0:
+        return redirect('/cart')
     cart = session['cart']
     product_id = str(product_id)
      
@@ -230,12 +228,12 @@ def remove_from_cart(product_id, quantity):
     if quantity < 0:
         return redirect("/cart") #cannot remove a negative quantity for some error
     else:
-        if quantity == 0:
-            session['cart'] = cart.pop(product_id)
+        if (cart[product_id] - quantity) <= 0:
+            session['cart'].pop(product_id, None)
             return redirect('/cart')
         else:
             
-            session['cart'] = cart[product_id] - quantity
+            cart[product_id] = cart[product_id] - quantity
             return redirect('/cart')
 
 @app.route('/clear_cart')
@@ -249,10 +247,17 @@ def clear_cart():
 
 @app.route("/add_to_cart/<int:product_id>_<int:quantity>")   # Add to cart by product_id
 def add_to_cart(product_id, quantity):
-    
-    cart = session.get("cart", {})  # Get the cart from the session, or create a new one if it doesn't exist
+    product_id_str = str(product_id)
+    cart = session.get("cart", {})
+    if product_id_str not in cart:
+        cart[product_id_str] = 0
+    if ((quantity + cart[product_id_str]) > (get_product_by_id(product_id).stock_level)):
+        return redirect('/') #redirect with error saying you cannot add that many! max value x
 
-    product_id_str = str(product_id)  # Convert to string
+    # Get the cart from the session, or create a new one if it doesn't exist
+    if get_product_by_id(product_id) == None:
+        return redirect('/')
+    # Convert to string
     if product_id_str not in cart:
         cart[product_id_str] = quantity
     else:
@@ -296,6 +301,49 @@ def lower_stock_level(): #pass some authentication after purchase
 #endregion
 
 #region Auths
+
+@app.route('/change_phone_number', methods=["POST", "GET"])
+def change_phone_number_page():
+    if not session['username']:
+        abort(403)
+    if request.method == 'POST':
+        phone_num = encrypt_input(request.form['phone_number'], cipher)
+        update_phone_number(session['username'],phone_num) #pass in something that says the phone num has been updated.
+
+    return render_template('change_phone_number.html')
+
+@app.route('/change_security_questions', methods=['POST', 'GET'])
+def change_security_questions_page():
+    if not session['username']:
+        abort(403)
+    if request.method == 'POST':
+        
+        update_security_questions(session['username'], request.form['securityQ1'], request.form['securityQ2'], request.form['securityQ3'])
+        securityA1 = bcrypt.hashpw( request.form['securityA1'].encode('utf-8'), bcrypt.gensalt())
+        securityA2 = bcrypt.hashpw(request.form['securityA2'].encode('utf-8'), bcrypt.gensalt())
+        securityA3 = bcrypt.hashpw(request.form['securityA3'].encode('utf-8'), bcrypt.gensalt())
+        update_security_answers(session['username'],securityA1,securityA2 , securityA3)
+
+    return render_template('change_security_questions.html')
+
+@app.route('/change_picture', methods=['POST', 'GET'])
+def change_picture():
+    if not session['username']:
+        abort(403)
+    if request.method == 'POST':
+        #picture method
+        pass
+    return render_template('change_picture.html')
+
+@app.route('/change_address', methods=['POST', 'GET'])
+def change_address_page():
+    if not session['username']:
+        abort(403)
+    if request.method == 'POST':
+        address = encrypt_input(request.form['address'], cipher)
+        update_address(session['username'], address)
+    
+    return render_template('update_address.html')
 
 
 @app.route("/login", methods=['POST','GET'])
@@ -580,6 +628,31 @@ def encrypt_input(input:str, cipher:str) -> str:
 def decrypt_input(input:str, cipher:str) -> str:
     return cipher.decrypt(input).decode()
 
+def item_object_quantity_dict() -> dict:
+    object_quantity_dict = {}
+    try:
+        session['cart']
+    except KeyError:
+        session['cart'] = {}
+    
+    cart = session['cart']
+    for i in cart.keys():
+        object_quantity_dict[get_product_by_id(i)] = cart[i] #creates a dictionary of the products in the cart
+    return object_quantity_dict
+
+def compare_quantities(item_object_quantity_dict:dict) -> bool:
+    for i in item_object_quantity_dict:
+        if i.quantity < i.value:
+            return False
+    return True
+
+def quantity_is_positive(item_object_quantity_dict:dict) -> bool:
+    for i in item_object_quantity_dict:
+        if i.value < 0:
+            return False
+    return True
+
+    
 class checkoutInfo():
     def __init__(self, first_name, last_name, country,
                  state, post_code, address, shipping_country,
@@ -622,8 +695,12 @@ def group_order_history(order_history:list) -> list: #turns list of Order object
             previous_order_id = order_history[i].order_id
     return lst
 
- 
-
+def remove_invalid_quantities(item_object_quantity_dict:dict):
+    for i in item_object_quantity_dict:
+        if i.quantity < i.value:
+            i.value = i.quantity
+        if i.value <= 0:
+            item_object_quantity_dict.pop(i, None)
 
 
 

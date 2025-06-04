@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Change Security Questions{% endblock %}
+{% block content %}
+{% autoescape false %}
+
+<div class="d-flex justify-content-center align-items-start min-vh-100" style="background-color: white; padding-top: 100px; padding-bottom: 50px;">
+    <form action="/change_security_questions" id="form" method="POST" enctype="multipart/form-data"
+        class="rounded shadow p-4 border"
+        style="width: 100%; max-width: 600px; background-color: #e0e0e0;">
+
+        <h2 class="fw-bold text-center mb-4">Change Security Questions</h2>
+        <h4 class="text-danger text-center">{{ error }}</h4>
+
+
+        <!-- Security Q1 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 1</label>
+            <select name="securityQ1" id="securityQ1" class="form-select" required>
+                <option>What is your sibling's middle name?</option>
+                <option>What is the model and make of your first car?</option>
+                <option>What town were you born in?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="form-control" required />
+            <p id="securityA1LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Security Q2 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 2</label>
+            <select name="securityQ2" id="securityQ2" class="form-select" required>
+                <option>What was the name of your first stuffed toy?</option>
+                <option>What was the exam you first failed?</option>
+                <option>What was the name of your first pet?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="form-control" required />
+            <p id="securityA2LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Security Q3 -->
+        <div class="mb-3">
+            <label class="form-label">Security Question 3</label>
+            <select name="securityQ3" id="securityQ3" class="form-select" required>
+                <option>What was the name of the sporting team you first supported?</option>
+                <option>What was the concert you first went to?</option>
+                <option>In what city or town did your parents meet?</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="form-control" required />
+            <p id="securityA3LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+        </div>
+
+        <!-- Submit -->
+        <div class="d-grid mb-3">
+            <input type="submit" id="submit" value="Register" class="btn btn-primary btn-lg" />
+        </div>
+
+        <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+        <input type="hidden" id="token" name="csrf_token" value="{{ csrf_token() }}" />
+    </form>
+</div>
+
+<script src="static/script.js"></script>
+
+{% endautoescape %}
+{% endblock %}

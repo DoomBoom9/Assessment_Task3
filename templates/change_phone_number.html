@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Change Phone Number{% endblock %}
+
+{% block pageName %}
+<div id="pageName" class="text-center mb-4 fw-bold">Change Phone Number</div>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow p-4" style="width: 100%; max-width: 400px; background-color: #e0e0e0;">
+        <div class="text-center mb-3">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Company Logo" style="max-height: 50px;">
+        </div>
+        <h4 class="text-center mb-4 fw-bold">Update Phone Number</h4>
+        <form action="/change_phone_number" method="POST">
+            <div class="mb-3">
+                <label for="phone_number" class="form-label">New Phone Number</label>
+                <input type="text" class="form-control" id="phone_number" name="phone_number" placeholder="Enter new phone number" required>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-danger">Update</button>
+            </div>
+            <input type="hidden" id='token' name="csrf_token" value="{{ csrf_token() }}" />
+            <input name="honeypot" id="honeypot" class="visually-hidden" tabindex="-1" autocomplete="off">
+        </form>
+        <div class="text-center mt-3">
+            <a href="/dashboard" class="text-decoration-none">Back to Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

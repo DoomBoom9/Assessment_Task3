@@ -7,7 +7,7 @@ except ImportError:
     from base import Model
     from ORM_TEST import engine, ORM_session
 
-from sqlalchemy import text
+from sqlalchemy import text, update
 
 default_image_dir = 'static/4.png'
 
@@ -225,8 +225,30 @@ def update_picture(uid,file_name):
             "UPDATE users SET picture=:b WHERE id=:a;"),{"a": uid, "b": file_name})
         connection.commit()
     
-    
+def update_phone_number(username:str, phone_num):   
+    with engine.connect() as connection:
+        connection.execute(text(
+            "UPDATE users SET phone_number=:b WHERE username=:a;"),{"a": username, "b": phone_num})
+        connection.commit()
 
+def update_address(username:str, address):
+    with engine.connect() as connection:
+        connection.execute(text(
+            "UPDATE users SET address=:b WHERE username=:a;"),{"a": username, "b": address})
+        connection.commit()
+
+def update_security_questions(username:str, security_question_1:str, security_question_2:str, security_question_3:str):
+    with engine.connect() as connection:
+        connection.execute(text(
+            "UPDATE users SET securityQ1=:b, securityQ2=:c, securityQ3=:d  WHERE username=:a;"),{"a": username, "b": security_question_1, "c": security_question_2, "d":security_question_3 })
+        connection.commit()
+
+def update_security_answers(username:str, security_answer_1:str, security_answer_2:str, security_answer_3:str):
+    with engine.connect() as connection:
+        connection.execute(text(
+            "UPDATE users SET securityA1=:b, securityA2=:c, securityA3=:d  WHERE username=:a;"),{"a": username, "b": security_answer_1, "c": security_answer_2, "d":security_answer_3 })
+        connection.commit()
+        
 def update_password(username, password):
     with engine.connect() as connection:
         connection.execute(text(
