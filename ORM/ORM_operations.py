@@ -15,14 +15,20 @@ default_image_dir = 'static/4.png'
 
 def get_products():
     products = Product.query.all()
+    if products is None:
+        raise Exception('Products expected but NoneType was recieved')
     return products
 
-def get_product_by_id(product_id):
+def get_product_by_id(product_id:int):
     product = Product.query.filter(Product.id == product_id).first()
+    if product is None:
+       raise Exception('Valid product expected but NoneType was given')
     return product
 
 def get_user(username):
     user = User.query.filter(User.username == username).first()
+    if user is None:
+        raise Exception('Valid user expected but NoneType was given')
     return user
 
 def deplete_stock_level(product_id, quantity):
@@ -38,6 +44,8 @@ def get_order_by_id(order_id):
     order = Order.query.filter(Order.order_id == order_id).all()
     for value in order:
         res.append(value)
+    if res[0] is None:
+        raise Exception('Valid order expected but NoneType was given')
     return res
 
 
@@ -92,6 +100,8 @@ def get_categories() -> list:
     categories = Category.query.all()
     for category in categories:
         res.append(category)
+    if res[0] is None:
+        raise Exception('Categories expected but NoneType was found')
     return res
 
 def get_order_history(user_id):
@@ -112,8 +122,8 @@ def get_privilage(username):
         res = res.fetchone()
         for value in res:
             role.append(value)
-        
-    
+        if role[0] is None:
+            raise Exception('Valid role expected by NoneType was given')
         return role[0]
 
 def get_UID(username):
@@ -125,7 +135,8 @@ def get_UID(username):
         res = res.fetchone()
         for value in res:
             uid.append(value)
-    
+        if uid[0] is None:
+            raise Exception('UID expected but NoneType was found')
         return uid[0]
 
 def get_password(id):
@@ -137,6 +148,8 @@ def get_password(id):
         res = res.fetchone()
         for value in res:
             password.append(value)
+        if password[0] is None:
+            raise Exception('Password expected but NoneType was found')
     
         return password[0] #returns hashed password that's stored in the db.
 
@@ -150,7 +163,8 @@ def get_displayables(username:str) -> list:
         res = res.fetchone()
         for value in res:
             user.append(value)
-        
+        if user[0] is None:
+            raise Exception('Displayables expected but NoneType was found')
         return user
 
 def get_security_questions(username:str) -> list:
@@ -162,7 +176,8 @@ def get_security_questions(username:str) -> list:
         res = res.fetchone()
         for value in res:
             user.append(value)
-
+        if user[0] is None:
+            raise Exception('Security questions expected but NoneType was found')
         return user
     
 def get_security_answers(username:str) -> list:
@@ -176,7 +191,8 @@ def get_security_answers(username:str) -> list:
 
         for value in res:
             answers.append(value)
-     
+        if answers[0] is None:
+            raise Exception('Security answers expected but NoneType was found')
         return answers
 
 
@@ -190,6 +206,8 @@ def get_last_attempt(username):
         res = res.fetchone()
         for value in res:
             last_attempt.append(value)
+        if last_attempt[0] is None:
+            raise TypeError('float expected but NoneType was found')
         return last_attempt[0]
 
 def get_picture(uid) -> str:
@@ -202,7 +220,8 @@ def get_picture(uid) -> str:
         res = res.fetchone()
         for value in res:
             picture.append(value)
-        
+        if picture[0] is None:
+            raise Exception('picture filepath expected but NoneType was found')
         return picture[0]
 
 def get_attempts(username) -> list:
@@ -215,6 +234,8 @@ def get_attempts(username) -> list:
         res = res.fetchone()
         for value in res:
             attempts.append(value)
+        if attempts[0] is None:
+            raise TypeError('Integer was expected but NoneType was found')
         return attempts[0]
 #endregion
 
@@ -272,4 +293,4 @@ def update_attempts(username, attempts:int):
 #endregion
 
 if __name__ == "__main__":
-    pass
+    deplete_stock_level(43, 3)

@@ -10,17 +10,28 @@ function toggle_cart_options(productId) {
         cart_options.hidden = false;
         product_quantity.value = 1;
     }
-    if (product_quantity.value <= 0) {
+    if (parseInt(product_quantity.value) <= 0) {
         cart_options.hidden = true;
         product_quantity.value = 0;  
     }
     //window.location.href = '/add_to_cart/' + productId + '_' + product_quantity.value;
 }
 
+function control_quantity_field(productId){
+    var product_quantity = document.getElementById("cart_product_quantity_" + productId);
+    if (parseInt(product_quantity.value) + 1 > product_quantity.max){
+        product_quantity.value = product_quantity.max;
+        return;
+    }
+}
+
 function increase_product_quantity(productId) {
     var product_quantity = document.getElementById("cart_product_quantity_" + productId);
-    if (product_quantity.value <= 0) {
+    if (parseInt(product_quantity.value) <= 0) {
         toggle_cart_options(productId);
+        return;
+    }
+    if ((parseInt(product_quantity.value) + 1) > parseInt(product_quantity.max)){
         return;
     }
     product_quantity.value = parseInt(product_quantity.value) + 1;
@@ -30,7 +41,7 @@ function increase_product_quantity(productId) {
 function decrease_product_quantity(productId) {
     var product_quantity = document.getElementById("cart_product_quantity_" + productId);
     product_quantity.value = parseInt(product_quantity.value) - 1;
-    if (product_quantity.value <= 0) {
+    if (parseInt(product_quantity.value) <= 0) {
         toggle_cart_options(productId);
         return;
     }
@@ -64,6 +75,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById("cart_product_quantity_" + i).addEventListener("change", function(){
             var product_id = event_listener_id();
             toggle_cart_options(product_id);
+            control_quantity_field(product_id);
         });
         document.getElementById('confirm_cart_' + i).addEventListener("click", function(){
             var product_id = event_listener_id();

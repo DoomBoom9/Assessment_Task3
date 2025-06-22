@@ -12,10 +12,11 @@ from datetime import datetime, date
 from flask_wtf import CSRFProtect
 from werkzeug.exceptions import RequestEntityTooLarge
 from ORM.ORM_operations import *
+import sys
+from itertools import groupby
 
 #region __init__
 app = Flask(__name__) #insert private keygen somewhere here
-
 
 # Configure session to use server-side storage
 app.config['SESSION_TYPE'] = 'filesystem'  # Stores sessions in files (can store on database, remembers sessions etc., usage statistics, no of logged in, when, etc.)
@@ -24,9 +25,8 @@ app.config['UPLOAD_FOLDER'] = 'static/profile_pictures' #upload folder filepath
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024 #2Mb file size limit
 
 csrf = CSRFProtect(app) #uses the csrfprotect module to generate tokens that inserts into forms and then checks if they match/are valid
-
-
 key = os.getenv("ENV_STR") #error if encryption key is not in the env
+
 if not key:
     raise ValueError("ENV_STR not found")
 
@@ -103,7 +103,7 @@ def admin_dashboard():
 def checkout_page():
     if request.method == 'POST':
 
-        print(request.form)
+        
         session['checkout_info'] = checkoutInfo( #fix this somewhere
             request.form['first_name'],
             request.form['last_name'],
@@ -121,9 +121,7 @@ def checkout_page():
             request.form['cc_expire'],
             request.form['cc_cvv']
         )
-
-        session['authentication'] = True
-
+        session['authentication'] = True 
         return redirect('/lower_stock_level') #redirects to the receipt page with the checkout info and cart items
 
     if ('username' not in session):
@@ -172,12 +170,23 @@ def receipt_page(): #so you cant access this page without having bought somethin
     session['authentication'] = False
 
     order_info = get_order_by_id(session['order_id'])
-
-    return render_template("receipt.html", user=session['checkout_info'], order=order_info ) #pass the cart to the receipt page
+    order_product_name = {}
+    for order in order_info:
+        product = get_product_by_id(order.product_id)
+        order_product_name[order] = product.name
+    return render_template("receipt.html", user=session['checkout_info'], order=order_product_name) #pass the cart to the receipt page
 
 #endregion
 
 #region Non-Displayable Routes
+@app.route('/search_<string:search_term>', methods=['POST','GET'])
+def search_product(search_term):
+    query = Product.query
+    query = query.filter(Product.name.like('%'+search_term+'%'))
+    query = query.order_by(Product.name).all()
+    cats = get_categories()
+    return render_template('products.html', products=query, categories=cats)
+
 @app.route('/sort_orders_<string:sort_type>')
 def sort_orders(sort_type):
     if sort_type != 'earliest':
@@ -196,22 +205,22 @@ def sort_orders(sort_type):
 def sort_products(sort_type):
     if sort_type not in ['low-high', 'high-low', 'a-z', 'z-a']:
         return redirect('/')
-    products = get_products()
+    product_list = get_products()
     category_list = get_categories()
 
     if sort_type == 'low-high':
-        sorted_list = sorted(products, key=lambda x: x.price, reverse=False)
+        sorted_list = sorted(product_list, key=lambda x: x.price, reverse=False)
         #return some function with new list
         return render_template('products.html', products=sorted_list, categories=category_list)
     if sort_type == 'high-low':
-        sorted_list = sorted(products, key=lambda x: x.price, reverse=True)
+        sorted_list = sorted(product_list, key=lambda x: x.price, reverse=True)
         #return some function with new list
         return render_template('products.html', products=sorted_list, categories=category_list)
     if sort_type == 'a-z':
-        sorted_list = sorted(products, key=lambda x: x.name, reverse=False)
+        sorted_list = sorted(product_list, key=lambda x: x.name, reverse=False)
         return render_template('products.html', products=sorted_list, categories=category_list)
     if sort_type == 'z-a':
-        sorted_list = sorted(products, key=lambda x: x.name, reverse=True)
+        sorted_list = sorted(product_list, key=lambda x: x.name, reverse=True)
         return render_template('products.html', products=sorted_list, categories=category_list)
 
 @app.route("/remove_from_cart/<int:product_id>_<int:quantity>")
@@ -249,28 +258,24 @@ def clear_cart():
 def add_to_cart(product_id, quantity):
     product_id_str = str(product_id)
     cart = session.get("cart", {})
+
     if product_id_str not in cart:
-        cart[product_id_str] = 0
-    if ((quantity + cart[product_id_str]) > (get_product_by_id(product_id).stock_level)):
-        return redirect('/') #redirect with error saying you cannot add that many! max value x
+        if (quantity > (get_product_by_id(product_id).stock_level)):
+            return redirect('/') #redirect with error saying you cannot add that many! max value x
+        else:
+            cart[product_id_str] = quantity
+    else:
+        if ((quantity + cart[product_id_str]) > (get_product_by_id(product_id).stock_level)):
+            return redirect('/')
+        else:
+            cart[product_id_str] += quantity
 
     # Get the cart from the session, or create a new one if it doesn't exist
     if get_product_by_id(product_id) == None:
         return redirect('/')
-    # Convert to string
-    if product_id_str not in cart:
-        cart[product_id_str] = quantity
-    else:
-        cart[product_id_str] += quantity
- 
-    # IMPORTANT - Convert product_id to a string (because session keys are strings).  
-    # If the product is already in the cart, increase the quantity by 1.
-    # If not, start with 0 and add 1.
 
-    print(cart)
-    session["cart"] = cart
-    print(session["cart"])
     # Save the updated cart back into the session.
+    session["cart"] = cart
 
     return redirect("/")
 
@@ -287,7 +292,7 @@ def lower_stock_level(): #pass some authentication after purchase
 
     for item in cart:
         product = get_product_by_id(item)
-        if (product.stock_level - cart[item])<= 0:
+        if (product.stock_level - cart[item]) < 0:
             return render_template("error.html", error="Not enough stock available.") #fix this error at the end
         else:     
             subtotal = product.price * cart[item]
@@ -422,6 +427,7 @@ def register():
         if checkValidUser(username) == True: #checks valid username
             return render_template("register.html", error='Username is taken! Try again')
         password = str(request.form['password'])
+        print(sys.getsizeof(password))
         securityQ1 = request.form['securityQ1']
         securityQ2 = request.form['securityQ2']
         securityQ3 = request.form['securityQ3']
@@ -446,6 +452,7 @@ def register():
             phone_num = sanitise(phone_num)
 
             password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()) #hashes things that could be used as passwords
+            print(sys.getsizeof(password))
             securityA1 = bcrypt.hashpw(securityA1.encode('utf-8'), bcrypt.gensalt())
             securityA2 = bcrypt.hashpw(securityA2.encode('utf-8'), bcrypt.gensalt())
             securityA3 = bcrypt.hashpw(securityA3.encode('utf-8'), bcrypt.gensalt())
@@ -585,7 +592,7 @@ def add_security_headers(resp):
 
 #endregion
 #region Error Handling
-"""@app.errorhandler(Exception)
+@app.errorhandler(Exception)
 def handle_exception(e):
     app.logger.error(f'{datetime.now()} Exception @ip={request.remote_addr}: {e}')
     return render_template('error.html', error='')
@@ -618,7 +625,7 @@ def page_not_found(e):
 @app.errorhandler(500)
 def internal_error(e):
     app.logger.error(f'{datetime.now()} Internal Server Error @ip={request.remote_addr}: {e}')
-    return render_template('error.html', error=500), 500"""
+    return render_template('error.html', error=500), 500
 #endregion
 
 #region misc needed in main
@@ -628,30 +635,17 @@ def encrypt_input(input:str, cipher:str) -> str:
 def decrypt_input(input:str, cipher:str) -> str:
     return cipher.decrypt(input).decode()
 
-def item_object_quantity_dict() -> dict:
+def item_object_quantity_dict() -> dict: 
+
     object_quantity_dict = {}
     try:
         session['cart']
     except KeyError:
         session['cart'] = {}
-    
     cart = session['cart']
     for i in cart.keys():
         object_quantity_dict[get_product_by_id(i)] = cart[i] #creates a dictionary of the products in the cart
     return object_quantity_dict
-
-def compare_quantities(item_object_quantity_dict:dict) -> bool:
-    for i in item_object_quantity_dict:
-        if i.quantity < i.value:
-            return False
-    return True
-
-def quantity_is_positive(item_object_quantity_dict:dict) -> bool:
-    for i in item_object_quantity_dict:
-        if i.value < 0:
-            return False
-    return True
-
     
 class checkoutInfo():
     def __init__(self, first_name, last_name, country,
@@ -676,34 +670,10 @@ class checkoutInfo():
         self.expiration_date = expiration_date
         self.cvv = cvv
 
-def group_order_history(order_history:list) -> list: #turns list of Order objects into a 2d array, with subarray groupings by order_id
-    lst = []
-    sub_list = []
-    previous_order_id = None
-    i = 0
-    while i < len(order_history):
-        if previous_order_id is None:
-            previous_order_id = order_history[i].order_id
-        if order_history[i].order_id == previous_order_id:
-            sub_list.append(order_history[i])
-            i += 1
-            if i == len(order_history):
-                lst.append(sub_list)
-        else:
-            lst.append(sub_list)
-            sub_list = []
-            previous_order_id = order_history[i].order_id
-    return lst
-
-def remove_invalid_quantities(item_object_quantity_dict:dict):
-    for i in item_object_quantity_dict:
-        if i.quantity < i.value:
-            i.value = i.quantity
-        if i.value <= 0:
-            item_object_quantity_dict.pop(i, None)
-
-
-
+# uses lambdafunction and the builtin itertools groupby function to order by order id into a 2d array
+# where each subarray as the same order id 
+def group_order_history(order_history: list) -> list:
+    return [list(group) for _, group in groupby(order_history, key=lambda x: x.order_id)]
 
 #endregion
 

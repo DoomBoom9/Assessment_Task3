@@ -133,9 +133,6 @@ def check_all(username:str, password:str, securityA1:str, securityA2:str, securi
     else:
         return True
     
-
-
-
 if __name__ == "__main__":
     # Add unit tests for validation functions here
     pass

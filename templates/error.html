@@ -1,22 +1,33 @@
 {% extends "base.html" %}
-{% block content%}
-{% if error==404 %}
 
-    <h1>Oops! Page not found.</h1>
-    <p>Sorry, the page you're looking for doesn't exist. Please check the URL or go back to the <a href="/">homepage</a>.</p>
+{% block content %}
+<div class="container d-flex flex-column align-items-center justify-content-center" style="min-height: 80vh; padding-top: 70px;">
+  <div class="text-center p-4 shadow rounded" style="max-width: 500px; background-color: #f8f9fa;">
+    
+    {% if error == 404 %}
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#dc3545" class="mb-3" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.5 1.5 0 0 0-1.964 0L.165 6.233c-.58.489-.232 1.39.537 1.39H1v6.125A1.25 1.25 0 0 0 2.25 15h3A1.25 1.25 0 0 0 6.5 13.75V10.5h3v3.25A1.25 1.25 0 0 0 10.75 15h3A1.25 1.25 0 0 0 15 13.75V7.624h.298c.77 0 1.118-.901.537-1.39L8.982 1.566z"/>
+      </svg>
+      <h1 class="display-6 fw-bold text-danger">Oops! Page not found.</h1>
+      <p>code: 404</p>
+      <p class="text-muted">Sorry, the page you're looking for doesn't exist.</p>
 
+    {% elif error == 500 %}
+      <h1 class="display-6 fw-bold text-danger">Unexpected error occurred</h1>
+      <p>code: 500</p>
+      <p class="text-muted">Something went wrong on our end.</p>
 
-{% elif error==500 %}
+    {% elif error == 403 %}
+      <h1 class="display-6 fw-bold text-warning">Access Forbidden</h1>
+      <p>code: 403</p>
+      <p class="text-muted">You don't have permission to view this page.</p>
 
-    <h1>An unexpected error has occured! </h1>
-    <p><a href="/">homepage</a></p>
-{%elif error==403 %}
-    <h1>Forbidden</h1>
-    <p>Sorry, you don't have permission to access this page. Please go back to the <a href="/">homepage</a>.</p>
-{% else %}
+    {% else %}
+      <h1 class="display-6 fw-bold text-danger">Unexpected Error</h1>
+      <p class="text-muted">Something went wrong on our end</p>
+    {% endif %}
 
-    <h1>An unexpected error has occured! </h1>
-    <p>{{error}}</p>
-    <p> <a href="/">homepage</a></p>
-{% endif %}
-{%endblock%}
+    <a href="/" class="btn btn-outline-success mt-3">Back to Homepage</a>
+  </div>
+</div>
+{% endblock %}

@@ -15,30 +15,38 @@
         <!-- Username -->
         <div class="mb-3">
             <input type="text" name="username" id="username" placeholder="Username" class="form-control" required />
-            <p id="usernameLengthReq" class="text-danger small" hidden>Username must be less than 26 characters!</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="usernameLengthReq" class="text-danger small mt-2 ms-2" hidden>Username must be less than 26 characters!</p>
+            </div>
         </div>
 
         <!-- Password -->
         <div class="mb-3">
             <input type="password" name="password" id="password" placeholder="Password" class="form-control" required />
-            <p id="passwordLengthReq" class="text-danger small" hidden>Password must be 12–25 characters.</p>
-            <p id="passwordUpperReq" class="text-danger small" hidden>Must include at least 1 uppercase letter.</p>
-            <p id="passwordLowerReq" class="text-danger small" hidden>Must include at least 1 lowercase letter.</p>
-            <p id="passwordIntReq" class="text-danger small" hidden>Must include at least 1 number.</p>
-            <p id="passwordSpecialReq" class="text-danger small" hidden>Must include at least 1 special character.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="passwordLengthReq" class="text-danger small mt-2 ms-2" hidden>Password must be 12–25 characters.</p>
+                <p id="passwordUpperReq" class="text-danger small mt-2 ms-2" hidden>Must include at least 1 uppercase letter.</p>
+                <p id="passwordLowerReq" class="text-danger small mt-2 ms-2" hidden>Must include at least 1 lowercase letter.</p>
+                <p id="passwordIntReq" class="text-danger small mt-2 ms-2" hidden>Must include at least 1 number.</p>
+                <p id="passwordSpecialReq" class="text-danger small mt-2 ms-2" hidden>Must include at least 1 special character.</p>
+            </div>
         </div>
 
         <!-- Phone -->
         <div class="mb-3">
             <input type="text" name="phoneNumber" id="phoneNumber" placeholder="Phone Number" class="form-control" required />
-            <p id="phoneLengthReq" class="text-danger small" hidden>Phone number must be 10 digits.</p>
-            <p id="phoneTypeReq" class="text-danger small" hidden>Only numeric characters allowed.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="phoneLengthReq" class="text-danger small mt-2 ms-2" hidden>Phone number must be 10 digits.</p>
+                <p id="phoneTypeReq" class="text-danger small mt-2 ms-2" hidden>Only numeric characters allowed.</p>
+            </div>
         </div>
 
         <!-- Address -->
         <div class="mb-3">
             <input type="text" name="address" id="address" placeholder="Address" class="form-control" required />
-            <p id="addressLengthReq" class="text-danger small" hidden>Address must be 50 characters or fewer.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="addressLengthReq" class="text-danger small mt-2 ms-2" hidden>Address must be 50 characters or fewer.</p>
+            </div>
         </div>
 
         <!-- Security Q1 -->
@@ -53,7 +61,9 @@
 
         <div class="mb-3">
             <input type="text" name="securityA1" id="securityA1" placeholder="Security Answer 1" class="form-control" required />
-            <p id="securityA1LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="securityA1LengthReq" class="text-danger small mt-2 ms-2" hidden>Answer must be 50 characters or fewer.</p>
+            </div>
         </div>
 
         <!-- Security Q2 -->
@@ -68,7 +78,9 @@
 
         <div class="mb-3">
             <input type="text" name="securityA2" id="securityA2" placeholder="Security Answer 2" class="form-control" required />
-            <p id="securityA2LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="securityA2LengthReq" class="text-danger small mt-2 ms-2" hidden>Answer must be 50 characters or fewer.</p>
+            </div>
         </div>
 
         <!-- Security Q3 -->
@@ -83,15 +95,19 @@
 
         <div class="mb-3">
             <input type="text" name="securityA3" id="securityA3" placeholder="Security Answer 3" class="form-control" required />
-            <p id="securityA3LengthReq" class="text-danger small" hidden>Answer must be 50 characters or fewer.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="securityA3LengthReq" class="text-danger small mt-2 ms-2" hidden>Answer must be 50 characters or fewer.</p>
+            </div>
         </div>
 
         <!-- File Upload -->
         <div class="mb-3">
             <label for="file" class="form-label">Upload ID</label>
             <input type="file" id="file" name="file" class="form-control" required />
-            <p id="fileSizeReq" class="text-danger small" hidden>File must be 2MB or less.</p>
-            <p id="fileTypeReq" class="text-danger small" hidden>File must be .jpeg, .jpg, or .png.</p>
+            <div class="container rounded border mt-2" style="background-color: #d3caca">
+                <p id="fileSizeReq" class="text-danger small mt-2 ms-2" hidden>File must be 2MB or less.</p>
+                <p id="fileTypeReq" class="text-danger small mt-2 ms-2" hidden>File must be .jpeg, .jpg, or .png.</p>
+            </div>
         </div>
 
         <!-- Submit -->
@@ -104,7 +120,7 @@
     </form>
 </div>
 
-<script src="static/script.js"></script>
+<script src="static/register.js"></script>
 
 {% endautoescape %}
 {% endblock %}
