@@ -288,4 +288,3 @@ def update_attempts(username, attempts:int):
         
 #endregion
 
-update_last_attempt('admin', '43')
