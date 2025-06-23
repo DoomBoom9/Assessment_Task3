@@ -135,7 +135,10 @@ def shopping_cart_page():
     object_quantity_dict= item_object_quantity_dict()
 
     if request.method == 'POST':
-        return redirect('/checkout')
+        if session['cart'] != {}:
+            return redirect('/checkout')
+        else:
+            return redirect('/cart')
     cart = session.get("cart", {})
     if not cart:
         return render_template("cart.html", error="Your cart is empty.")
@@ -144,6 +147,7 @@ def shopping_cart_page():
 @limiter.limit("5 per second")
 @app.route("/", methods=['POST', 'GET'])
 def products_page():
+    session["accessed_products_route"]= "/"
     product_list = get_products()
     category_list = get_categories()
     return render_template("products.html", products=product_list, categories=category_list)
@@ -151,10 +155,15 @@ def products_page():
 @limiter.limit(default)
 @app.route("/product_view_<int:product_id>", methods=['POST', 'GET'])
 def product_view(product_id):
+    session["accessed_products_route"]= "/product_view_"+ str(product_id)
     product_obj = get_product_by_id(product_id)
+    try:
+        quantity_in_cart = session['cart'][str(product_id)]
+    except KeyError:
+        quantity_in_cart = 0
     if product_obj == None:
         abort(404)
-    return render_template("product_view.html", product=product_obj)
+    return render_template("product_view.html", product=product_obj,quantity=quantity_in_cart)
 
 
 @limiter.limit(default)
@@ -181,6 +190,7 @@ def receipt_page(): #so you cant access this page without having bought somethin
 #region Non-Displayable Routes
 @app.route('/search_<string:search_term>', methods=['POST','GET'])
 def search_product(search_term):
+    session['accessed_products_route'] = '/search_'+search_term
     query = Product.query
     query = query.filter(Product.name.like('%'+search_term+'%'))
     query = query.order_by(Product.name).all()
@@ -203,6 +213,7 @@ def sort_orders(sort_type):
     
 @app.route("/sort_products_<string:sort_type>")
 def sort_products(sort_type):
+    session['accessed_products_route'] = '/sort_products_'+sort_type
     if sort_type not in ['low-high', 'high-low', 'a-z', 'z-a']:
         return redirect('/')
     product_list = get_products()
@@ -259,25 +270,21 @@ def add_to_cart(product_id, quantity):
     product_id_str = str(product_id)
     cart = session.get("cart", {})
 
+    if get_product_by_id(product_id) == None: #if product doesn't exist
+        return redirect(session['accessed_products_route'])
+
     if product_id_str not in cart:
         if (quantity > (get_product_by_id(product_id).stock_level)):
-            return redirect('/') #redirect with error saying you cannot add that many! max value x
+            return redirect(session['accessed_products_route']) #redirect with error saying you cannot add that many! max value x
         else:
             cart[product_id_str] = quantity
     else:
         if ((quantity + cart[product_id_str]) > (get_product_by_id(product_id).stock_level)):
-            return redirect('/')
+            return redirect(session['accessed_products_route'])
         else:
             cart[product_id_str] += quantity
 
-    # Get the cart from the session, or create a new one if it doesn't exist
-    if get_product_by_id(product_id) == None:
-        return redirect('/')
-
-    # Save the updated cart back into the session.
-    session["cart"] = cart
-
-    return redirect("/")
+    return redirect(session['accessed_products_route'])
 
 @app.route("/lower_stock_level")
 def lower_stock_level(): #pass some authentication after purchase
@@ -299,8 +306,8 @@ def lower_stock_level(): #pass some authentication after purchase
             insert_order(order_id, product.id, user_id, cart[item], product.price, subtotal) #inserts the order into the database
             deplete_stock_level(product.id, cart[item]) #updates the stock level of the product 
                    
-        session['cart'] = {}
-        session['order_id'] = order_id
+    session['cart'] = {}
+    session['order_id'] = order_id
     return redirect("/receipt") #redirects to the receipt page
     
 #endregion
@@ -373,39 +380,42 @@ def login():
         username = sanitise(username)
         password = sanitise(password)
         curr_time = time.time()
-        last_attempt = get_last_attempt(username)
-        attempts = get_attempts(username)
-        delta_time = curr_time - last_attempt
-        uid = get_UID(username)
-        if (delta_time < timeout) and (attempts < 1): #if the time between last attempt and current attempt is less than timeout and current attempts are less than 1
-            app.logger.warning(f'{datetime.now()} user: {username}, ID: {uid} has been locked due to too many login attempts. Last request @ip={request.remote_addr}')
-            return render_template('login.html', error='Too many attempts please try again later')
-        if (delta_time > timeout) and (attempts < 5): #if the time between last attempt and current attempt is greater than timeout and attempts are less than 5
-            app.logger.debug(f'{datetime.now()} user: {username}, has had attempts reset')
-            update_attempts(username, 5) # reset login attempts
-        if not uid: #if uid does not exist
-            return render_template('login.html', error='Username or Password was incorrect') #username is incorrect as there is no UID with corresponding username
-        hash = get_password(uid)
-        if not password: #if password does not exist 
-            return render_template('login.html', error='Username or Password was incorrect') #username is incorrect as there is no password with corresponding UID
-        if bcrypt.checkpw(password.encode('utf-8'), hash) == False: #checks the hashed and given password & is incorrect
-            attempts -= 1
-            update_attempts(username, attempts)
-            last_attempt = time.time()
-            update_last_attempt(username, last_attempt)
-            return render_template('login.html', error='Username or Password was incorrect') #password is incorrects as salted hashes do not match
-        else: #log in successful
-            session['username'] = username
-            session['role'] = get_privilage(username)
-            if session['role'] == 1: #admin user
-                app.logger.info('Admin user logged in')
-                return redirect('/admin_dashboard')
-            if session['role'] == 2: #normal user
-                app.logger.info('Normal user logged in')
-                return redirect('/dashboard')
-            else: #invalid role
-                app.logger.error(f'{datetime.now()} Invalid roleID was passed @ip={request.remote_addr}')
-                raise ValueError('invalid role ID was passed')
+        try:
+            last_attempt = get_last_attempt(username)
+            attempts = get_attempts(username)
+            delta_time = curr_time - last_attempt
+            uid = get_UID(username)
+            if (delta_time < timeout) and (attempts < 1): #if the time between last attempt and current attempt is less than timeout and current attempts are less than 1
+                app.logger.warning(f'{datetime.now()} user: {username}, ID: {uid} has been locked due to too many login attempts. Last request @ip={request.remote_addr}')
+                return render_template('login.html', error='Too many attempts please try again later')
+            if (delta_time > timeout) and (attempts < 5): #if the time between last attempt and current attempt is greater than timeout and attempts are less than 5
+                app.logger.debug(f'{datetime.now()} user: {username}, has had attempts reset')
+                update_attempts(username, 5) # reset login attempts
+            if not uid: #if uid does not exist
+                return render_template('login.html', error='Username or Password was incorrect') #username is incorrect as there is no UID with corresponding username
+            hash = get_password(uid)
+            if not password: #if password does not exist 
+                return render_template('login.html', error='Username or Password was incorrect') #username is incorrect as there is no password with corresponding UID
+            if bcrypt.checkpw(password.encode('utf-8'), hash) == False: #checks the hashed and given password & is incorrect
+                attempts -= 1
+                update_attempts(username, attempts)
+                last_attempt = time.time()
+                update_last_attempt(username, last_attempt)
+                return render_template('login.html', error='Username or Password was incorrect') #password is incorrects as salted hashes do not match
+            else: #log in successful
+                session['username'] = username
+                session['role'] = get_privilage(username)
+                if session['role'] == 1: #admin user
+                    app.logger.info('Admin user logged in')
+                    return redirect('/admin_dashboard')
+                if session['role'] == 2: #normal user
+                    app.logger.info('Normal user logged in')
+                    return redirect('/dashboard')
+                else: #invalid role
+                    app.logger.error(f'{datetime.now()} Invalid roleID was passed @ip={request.remote_addr}')
+                    raise ValueError('invalid role ID was passed')
+        except TypeError:
+            redirect('/login')
         #Somesort of logging or page response should go here with req username and password
    
     return render_template("login.html")
@@ -476,7 +486,7 @@ def register():
             file.save(file_name) #saves file
             uid = int(uid) 
             update_picture(uid, file_name) #uploads filepath to UID
-            return redirect("/")
+            return redirect("/login")
         
         #Somesort of logging or page response should go here
     
@@ -679,4 +689,4 @@ def group_order_history(order_history: list) -> list:
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=False, host="0.0.0.0", port=5000)

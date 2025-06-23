@@ -27,6 +27,7 @@
             <h4 class="text-success">${{ product.price }}</h4>
             <p class="mb-1"><strong>Unit:</strong> {{ product.unit }}</p>
             <p><strong>Stock Level:</strong> {{ product.stock_level }}</p>
+            <p><strong>In cart:</strong> {{quantity}}</p>
 
             <button class="btn btn-dark mt-3" id="add_to_cart">
                 <i class="bi bi-cart-plus"></i> Add to Cart
@@ -46,8 +47,8 @@
 
             <h5>Specifications</h5>
             <ul class="list-unstyled">
-                <li><strong>Dimensions:</strong> {{ product.dimensions }}</li>
-                <li><strong>Weight:</strong> {{ product.weight }}</li>
+                <li><strong>Dimensions:</strong> {% if product.dimensions == None %}N/A{%else%}{{ product.dimensions }}{%endif%}</li>
+                <li><strong>Weight:</strong> {% if product.weight == None %}N/A{% else %}{{ product.weight }}kg{%endif%}</li>
             </ul>
         </div>
     </div>

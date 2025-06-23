@@ -53,31 +53,35 @@ function event_listener_id() {
     return product_id;
 }
 
+const product_ids = document.getElementsByClassName('product_id')
+
+
+
 document.addEventListener("DOMContentLoaded", function() {
     for (var i = 1; i <= document.getElementById('number_of_categories').value; i++){
         var category = document.querySelectorAll(`[data-category="${i}"]`);
         document.getElementById(`cat_${i}_text`).innerHTML = `(${category.length})`;
     }
     
-    for (var i = 1; i <= document.getElementById('number_of_products').value; i++) { 
-        document.getElementById("add_to_cart_" + i).addEventListener("click", function(){
+    for (var i = 0; i < product_ids.length; i++) { 
+        document.getElementById("add_to_cart_" + product_ids[i].value).addEventListener("click", function(){
             var product_id = event_listener_id();
             toggle_cart_options(product_id);
         });
-        document.getElementById("plus_button_"+i).addEventListener("click", function(){
+        document.getElementById("plus_button_"+product_ids[i].value).addEventListener("click", function(){
             var product_id = event_listener_id();
             increase_product_quantity(product_id);
         });
-        document.getElementById("minus_button_"+i).addEventListener("click", function(){
+        document.getElementById("minus_button_"+product_ids[i].value).addEventListener("click", function(){
             var product_id = event_listener_id();
             decrease_product_quantity(product_id);
         });
-        document.getElementById("cart_product_quantity_" + i).addEventListener("change", function(){
+        document.getElementById("cart_product_quantity_" + product_ids[i].value).addEventListener("change", function(){
             var product_id = event_listener_id();
             toggle_cart_options(product_id);
             control_quantity_field(product_id);
         });
-        document.getElementById('confirm_cart_' + i).addEventListener("click", function(){
+        document.getElementById('confirm_cart_' + product_ids[i].value).addEventListener("click", function(){
             var product_id = event_listener_id();
             var product_quantity = document.getElementById("cart_product_quantity_" + product_id);
             window.location.href = '/add_to_cart/' + product_id + '_' + product_quantity.value;

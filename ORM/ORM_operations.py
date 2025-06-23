@@ -1,17 +1,13 @@
 try:
     from ORM.tables import *
-    from ORM.base import Model
-    from ORM.ORM_TEST import engine, ORM_session
+    from ORM.ORM_session import engine, ORM_session
 except ImportError:
     from tables import *
-    from base import Model
-    from ORM_TEST import engine, ORM_session
+    from ORM_session import engine, ORM_session
 
 from sqlalchemy import text, update
 
 default_image_dir = 'static/4.png'
-
-
 
 def get_products():
     products = Product.query.all()
@@ -292,5 +288,4 @@ def update_attempts(username, attempts:int):
         
 #endregion
 
-if __name__ == "__main__":
-    deplete_stock_level(43, 3)
+update_last_attempt('admin', '43')

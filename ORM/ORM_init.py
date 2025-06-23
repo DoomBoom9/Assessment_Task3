@@ -1,9 +1,9 @@
 try:
-    from ORM.ORM_TEST import engine, ORM_session
+    from ORM.ORM_session import engine, ORM_session
     from ORM.base import Model
     from ORM.tables import *
 except ImportError:
-    from ORM_TEST import engine, ORM_session
+    from ORM_session import engine, ORM_session
     from base import Model
     from tables import *
 
@@ -50,35 +50,52 @@ roles = [
     [2, 'user']
 ]
 
-if __name__ == "__main__":
-    # Create the database tables
-    # This will create all tables defined in the models (base and tables in tables)
-    Model.metadata.drop_all(engine)
-    Model.metadata.create_all(engine)
+# Create the database tables
+# This will create all tables defined in the models (base and tables in tables)
+Model.metadata.drop_all(engine)
+Model.metadata.create_all(engine)
 
-    for element in category_info:
-        ORM_session.add(Category(
-            category=element
-        ))
+for element in category_info:
+    ORM_session.add(Category(
+        category=element
+    ))
 
-    for role in roles:
-        ORM_session.add(Role(
-            role=role[0],
-            description=role[1]
-        ))
+for role in roles:
+    ORM_session.add(Role(
+        role=role[0],
+        description=role[1]
+    ))
 
-    for product in product_info:
-        ORM_session.add(Product(
-            name=product[0],
-            description=product[1],
-            dimensions=product[2],
-            weight=product[3],
-            unit=product[4],
-            price=product[5],
-            stock_level=product[6],
-            category=product[7],
-            image=product[8]
-        ))
-    ORM_session.commit()
-    ORM_session.close()
-  
+for product in product_info:
+    ORM_session.add(Product(
+        name=product[0],
+        description=product[1],
+        dimensions=product[2],
+        weight=product[3],
+        unit=product[4],
+        price=product[5],
+        stock_level=product[6],
+        category=product[7],
+        image=product[8]
+    ))
+
+#adds an admin user
+ORM_session.add(User(
+    username='admin',
+    password='$2b$12$lN4SyYuCp.wY1BhEKDy6AO7OVK4.VIqnQy8h6RDx1HBTtLsPT0xi2',
+    securityQ1="What is your sibling's middle name?",
+    securityQ2="What was the name of your first stuffed toy?",
+    securityQ3="What was the name of the sporting team you first supported?",
+    securityA1="$2b$12$6/sUhc.8ssyJrBBwkwQepeJWdI/TAYsnCQCcBUgLpUHwGxF63N1T2",
+    securityA2="$2b$12$RcqOz./tQsAmJGQss3l/HuzUP0zYHaqaHHj2G4RScSAWwEFRtWMRy",
+    securityA3="$2b$12$v7wYo5X5vtaFqWMFYU0Nk.2b9.JXruxiEtr2ZfR18M.gtSxD6nZqe",
+    address='gAAAAABoWJu2Vl8r4yvQcSZdelxsNrbwqavSaY3QTE9SvhRZ_7OeXLuYvh4pOcR0Vcco8loUx3OxAB64YE80Z4fecAJT-aa1_Q==',
+    phone_number="gAAAAABoWJu2kzb9-kLyR8mJZkPFxJHUkALZktA1TgiWNaUY6y4QuDNjZXtt8Eq3eHBadIFzndKJ_Heb1txOVlPdtOEkQwB9cw==",
+    picture="static/profile_pictures/1.jpg",
+    role=1,
+    attempts=5,
+    last_attempt=1750637494.40712
+))
+ORM_session.commit()
+ORM_session.close()
+
